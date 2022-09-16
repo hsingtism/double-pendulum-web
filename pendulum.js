@@ -1,8 +1,9 @@
-const g = 1 //gravity
-const l1 = 1 //length to arm 
-const l2 = 1
-const m1 = 1 //mass of payload
-const m2 = 1
+let g = 2 //gravity
+let l1 = 1 //length to arm 
+let l2 = 1
+let m1 = 1 //mass of payload
+let m2 = 1
+
 let p1_p = 2 //position all in angles in radians
 let p2_p = 2
 let p1_v = 0 //velocity
@@ -10,13 +11,6 @@ let p2_v = 0
 
 const sin = Math.sin
 const cos = Math.cos
-
-function testPhysics(ll) {
-    if (ll == 0) return
-    console.log(p1_p, p2_p)
-    iterate(iterationPerFrame)
-    testPhysics(ll - 1)
-}
 
 function iterate(nInverse) {
     // equations taken from https://www.myphysicslab.com/pendulum/double-pendulum-en.html
@@ -40,3 +34,20 @@ function getCoordinates() {
     const p2_y = p1_y + l2 * cos(p2_p)
     return [p1_x, p1_y, p2_x, p2_y]
 }
+
+/*
+function testPhysics(ll) {
+    if (ll == 0) return
+    console.log(p1_p, p2_p)
+    iterate(iterationPerFrame)
+    testPhysics(ll - 1)
+}
+
+function iterationSpeed(n) {
+    const t1 = performance.now()
+    for (let i = 0; i < n; i++) iterate(iterationSubdivision)
+    console.log('sec/iter', (performance.now() - t1) / n)
+    console.log('iter/sec',n / (performance.now() - t1))
+    console.log('iter/frm',n / (performance.now() - t1) / 60)
+}
+*/

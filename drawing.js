@@ -1,9 +1,8 @@
-const iterationPerFrame = 100
-const iterationSubdivision = 1000
-const canvasSize = 600
-const canvasMidpoint = 0.5 * canvasSize 
+const iterationPerFrame = 20 // iterationPerFrame/iterationSubdivision*60 = simulation times real time, iterationPerFrame
+const simulationSpeedInverse = 30
 
-let ctx, circleRadius
+const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
+let ctx, canvasMidpoint, canvasSize, circleConstant
 const pi = Math.PI
 const tau = pi * 2
 
@@ -14,38 +13,45 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 }
 
 function pendinit() {
-    ctx = document.getElementById('c').getContext('2d')
+    const canvasElement = document.getElementById('c')
+    ctx = canvasElement.getContext('2d')
+    canvasSize = Math.min(canvasElement.width, canvasElement.height)
+    canvasMidpoint = 0.5 * canvasSize
+    circleConstant = 0.05 * canvasSize
     ctx.fillStyle = '#FFFFFF'
     ctx.strokeStyle = '#FFFFFF'
     ctx.lineWidth = 4
-    circleRadius = 15
+    animate()
 }
 
 let pendulumRadius
 
-function scaleCoordinates() {
-    pendulumRadius ||= l1 + l2
-    const scalingFactor = 0.4 * canvasSize / pendulumRadius
-    const simulationCoordinates = getCoordinates()
-    return simulationCoordinates.map(x => x * scalingFactor + canvasMidpoint)
-}
-
-function frameUpdate() {
+function animate() {
     function update() {
+        if (halt) {halt = false; return}
         for (let i = 0; i < iterationPerFrame; i++) iterate(iterationSubdivision)
-        const c = scaleCoordinates()
+        
+        // scaling coordinates
+        pendulumRadius = l1 + l2
+        const scalingFactor = 0.4 * canvasSize / pendulumRadius
+        const simulationCoordinates = getCoordinates()
+        const c = simulationCoordinates.map(x => x * scalingFactor + canvasMidpoint)
+        
+        // drawing
         clear()
         line(canvasMidpoint, canvasMidpoint, c[0], c[1])
-        ball(c[0], c[1])
+        ball(c[0], c[1], m1)
         line(c[0], c[1], c[2], c[3])
-        ball(c[2], c[3])
+        ball(c[2], c[3], m2)
+
 
         window.requestAnimationFrame(update)
     }
     window.requestAnimationFrame(update)
 }
 
-function ball(x, y) {
+function ball(x, y, mass) {
+    const circleRadius = circleConstant * Math.sqrt(mass) / (l1 + l2)
     ctx.beginPath()
     ctx.arc(x, y, circleRadius, 0, tau)
     ctx.fill()
@@ -61,3 +67,11 @@ function line(x1, y1, x2, y2) {
 function clear() {
     ctx.clearRect(0, 0, canvasSize, canvasSize)
 }
+
+let halt = false
+function killAnimation() {
+    halt = true
+    console.log("animation will be terminated next frame. call animate to restart.")
+}
+
+function getFramePerformance() {}
