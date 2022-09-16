@@ -6,3 +6,12 @@ body {
 #c {
     border: 1px solid #808080;
 }
+
+#trails {
+    z-index: -5;
+    border: 1px solid #00000000;
+}
+
+canvas {
+    position: absolute;
+}

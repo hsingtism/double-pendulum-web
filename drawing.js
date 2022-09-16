@@ -3,6 +3,7 @@ const simulationSpeedInverse = 30
 
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
 let ctx, canvasMidpoint, canvasSize, circleConstant
+let trailCtx // for trails
 const pi = Math.PI
 const tau = pi * 2
 
@@ -18,10 +19,14 @@ function pendinit() {
     canvasSize = Math.min(canvasElement.width, canvasElement.height)
     canvasMidpoint = 0.5 * canvasSize
     circleConstant = 0.05 * canvasSize
-    ctx.fillStyle = '#FFFFFF'
-    ctx.strokeStyle = '#FFFFFF'
+    ctx.fillStyle = '#A0A0FF'
+    ctx.strokeStyle = '#A0A0FF'
     ctx.lineWidth = 4
     animate()
+    
+    // trails
+    trailCtx = document.getElementById('trails').getContext('2d')
+    trailCtx.fillStyle = '#A0A0FF'
 }
 
 let pendulumRadius
@@ -44,6 +49,8 @@ function animate() {
         line(c[0], c[1], c[2], c[3])
         ball(c[2], c[3], m2)
 
+        //trails
+        trailDraw(c[2], c[3])
 
         window.requestAnimationFrame(update)
     }
@@ -62,6 +69,17 @@ function line(x1, y1, x2, y2) {
     ctx.moveTo(x1, y1)
     ctx.lineTo(x2, y2)
     ctx.stroke()
+}
+
+function trailDraw(x, y) {
+    trailCtx.beginPath()
+    trailCtx.arc(x, y, 1, 0, tau)
+    trailCtx.fill()
+
+    trailCtx.save()
+    trailCtx.fillStyle = '#00000006'
+    trailCtx.fillRect(0, 0, canvasSize, canvasSize)
+    trailCtx.restore()
 }
 
 function clear() {
