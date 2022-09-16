@@ -29,11 +29,13 @@ function pendinit() {
     trailCtx.fillStyle = '#A0A0FF'
 }
 
-let pendulumRadius
 
+// TODO multiple pendulums
 function animate() {
+    let pendulumRadius
     function update() {
         if (halt) {halt = false; return}
+        window.requestAnimationFrame(update)
         for (let i = 0; i < iterationPerFrame; i++) iterate(iterationSubdivision)
         
         // scaling coordinates
@@ -52,7 +54,6 @@ function animate() {
         //trails
         trailDraw(c[2], c[3])
 
-        window.requestAnimationFrame(update)
     }
     window.requestAnimationFrame(update)
 }
@@ -77,7 +78,7 @@ function trailDraw(x, y) {
     trailCtx.fill()
 
     trailCtx.save()
-    trailCtx.fillStyle = '#00000006'
+    trailCtx.fillStyle = '#00000002'
     trailCtx.fillRect(0, 0, canvasSize, canvasSize)
     trailCtx.restore()
 }
@@ -89,7 +90,6 @@ function clear() {
 let halt = false
 function killAnimation() {
     halt = true
-    console.log("animation will be terminated next frame. call animate to restart.")
 }
 
 function getFramePerformance() {}

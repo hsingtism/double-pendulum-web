@@ -5,7 +5,7 @@ let m1 = 1 //mass of payload
 let m2 = 1
 
 let p1_p = 2 //position all in angles in radians
-let p2_p = 2
+let p2_p = 2.5
 let p1_v = 0 //velocity
 let p2_v = 0
 
