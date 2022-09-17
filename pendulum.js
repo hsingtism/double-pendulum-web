@@ -1,18 +1,7 @@
-let g = 2 //gravity
-let l1 = 1 //length to arm 
-let l2 = 1
-let m1 = 1 //mass of payload
-let m2 = 1
-
-let p1_p = 2 //position all in angles in radians
-let p2_p = 2.5
-let p1_v = 0 //velocity
-let p2_v = 0
-
 const sin = Math.sin
 const cos = Math.cos
 
-function iterate(nInverse) {
+function iterate(nInverse, p1_p, p2_p, p1_v, p2_v, g, l1, l2) {
     // equations taken from https://www.myphysicslab.com/pendulum/double-pendulum-en.html
     const p1_a = (-g * (2 * m1 + m2) * sin(p1_p) 
             - m2 * g * sin(p1_p - 2 * p2_p)
@@ -25,9 +14,11 @@ function iterate(nInverse) {
     p2_v += p2_a / nInverse
     p1_p += p1_v / nInverse
     p2_p += p2_v / nInverse
+
+    return [p1_p, p2_p, p1_v, p2_v]
 }
 
-function getCoordinates() {
+function toCartesian(p1_p, p2_p, l1, l2) {
     const p1_x = l1 * sin(p1_p)
     const p1_y = l1 * cos(p1_p)
     const p2_x = p1_x + l2 * sin(p2_p)

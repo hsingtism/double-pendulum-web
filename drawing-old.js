@@ -1,3 +1,4 @@
+/*
 const iterationPerFrame = 20 // iterationPerFrame/iterationSubdivision*60 = simulation times real time, iterationPerFrame
 const simulationSpeedInverse = 30
 
@@ -97,3 +98,4 @@ function killAnimation() {
 }
 
 function getFramePerformance() {}
+*/
