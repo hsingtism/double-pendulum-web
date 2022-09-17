@@ -2,7 +2,7 @@ const iterationPerFrame = 20 // iterationPerFrame/iterationSubdivision*60 = simu
 const simulationSpeedInverse = 30
 
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
-let ctx, canvasMidpoint, canvasSize, circleConstant
+let ctx, canvasMidpoint, canvasSize, circleConstant, canvasElement
 let trailCtx // for trails
 const pi = Math.PI
 const tau = pi * 2
@@ -14,11 +14,11 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 }
 
 function pendinit() {
-    const canvasElement = document.getElementById('c')
+    canvasElement = document.getElementById('c')
     ctx = canvasElement.getContext('2d')
     canvasSize = Math.min(canvasElement.width, canvasElement.height)
     canvasMidpoint = 0.5 * canvasSize
-    circleConstant = 0.05 * canvasSize
+    circleConstant = 0.04 * canvasSize
     ctx.fillStyle = '#A0A0FF'
     ctx.strokeStyle = '#A0A0FF'
     ctx.lineWidth = 4
@@ -37,6 +37,10 @@ function animate() {
         if (halt) {halt = false; return}
         window.requestAnimationFrame(update)
         for (let i = 0; i < iterationPerFrame; i++) iterate(iterationSubdivision)
+        
+        canvasSize = Math.min(canvasElement.width, canvasElement.height)
+        canvasMidpoint = 0.5 * canvasSize
+        circleConstant = 0.04 * canvasSize
         
         // scaling coordinates
         pendulumRadius = l1 + l2
@@ -78,7 +82,7 @@ function trailDraw(x, y) {
     trailCtx.fill()
 
     trailCtx.save()
-    trailCtx.fillStyle = '#00000002'
+    trailCtx.fillStyle = '#0000000d'
     trailCtx.fillRect(0, 0, canvasSize, canvasSize)
     trailCtx.restore()
 }

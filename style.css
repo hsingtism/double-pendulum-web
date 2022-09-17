@@ -3,15 +3,14 @@ body {
     color: #ffffff;
 }
 
-#c {
-    border: 1px solid #808080;
-}
-
 #trails {
     z-index: -5;
-    border: 1px solid #00000000;
 }
 
 canvas {
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #808080;
 }
