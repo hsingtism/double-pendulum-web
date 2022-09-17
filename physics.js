@@ -25,20 +25,3 @@ function toCartesian(p1_p, p2_p, l1, l2) {
     const p2_y = p1_y + l2 * cos(p2_p)
     return [p1_x, p1_y, p2_x, p2_y]
 }
-
-/*
-function testPhysics(ll) {
-    if (ll == 0) return
-    console.log(p1_p, p2_p)
-    iterate(iterationPerFrame)
-    testPhysics(ll - 1)
-}
-
-function iterationSpeed(n) {
-    const t1 = performance.now()
-    for (let i = 0; i < n; i++) iterate(iterationSubdivision)
-    console.log('sec/iter', (performance.now() - t1) / n)
-    console.log('iter/sec',n / (performance.now() - t1))
-    console.log('iter/frm',n / (performance.now() - t1) / 60)
-}
-*/

@@ -17,7 +17,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            border: 1px solid #808080;
+            border: 1px solid #80808000;
+            width: calc(min(100vh, 100vw) * 0.9);
+            height: calc(min(100vh, 100vw) * 0.9);
         }
     </style>
     <script async src="physics.js"></script>
@@ -28,16 +30,16 @@
     <div id="containCanvas">
         <!-- this is needed because js generated canvas doesn't render right, or maybe i am do something wrong
         i am probably doing something wrong but we're gonna blame it on the browser -->
-        <canvas id="trails" width="577px" height="577px" style="z-index:-10;"></canvas>
-        <canvas id="0000" width="577px" height="577px" style="z-index:0;"></canvas>
-        <canvas id="0001" width="577px" height="577px" style="z-index:1;"></canvas>
-        <canvas id="0002" width="577px" height="577px" style="z-index:2;"></canvas>
-        <canvas id="0003" width="577px" height="577px" style="z-index:3;"></canvas>
-        <canvas id="0004" width="577px" height="577px" style="z-index:4;"></canvas>
-        <canvas id="0005" width="577px" height="577px" style="z-index:5;"></canvas>
-        <canvas id="0006" width="577px" height="577px" style="z-index:6;"></canvas>
-        <canvas id="0007" width="577px" height="577px" style="z-index:7;"></canvas>
-        <canvas id="0008" width="577px" height="577px" style="z-index:8;"></canvas>
+        <canvas id="trails" width="1000px" height="1000px" style="z-index:-10;"></canvas>
+        <canvas id="0000" width="1000px" height="1000px" style="z-index:0;"></canvas>
+        <canvas id="0001" width="1000px" height="1000px" style="z-index:1;"></canvas>
+        <canvas id="0002" width="1000px" height="1000px" style="z-index:2;"></canvas>
+        <canvas id="0003" width="1000px" height="1000px" style="z-index:3;"></canvas>
+        <canvas id="0004" width="1000px" height="1000px" style="z-index:4;"></canvas>
+        <canvas id="0005" width="1000px" height="1000px" style="z-index:5;"></canvas>
+        <canvas id="0006" width="1000px" height="1000px" style="z-index:6;"></canvas>
+        <canvas id="0007" width="1000px" height="1000px" style="z-index:7;"></canvas>
+        <canvas id="0008" width="1000px" height="1000px" style="z-index:8;"></canvas>
     </div>
 </body>
 

@@ -3,7 +3,17 @@ const simulationSpeedInverse = 30
 const lineWidth = 4
 const relativeCircleSize = 0.04
 
-const trailColorDecayOverlay = '#00000008'
+const trailColorDecayOverlay = '#00000002'
+
+// TODO make these user defined and framerate counter
+const startingAngle = 2
+const startingAngleDelta = 0.01
+const pendulumNumber = 3
+const hslOffsetDeg = 30
+
+const canvasSize = 1000
+const startingVelocity1 = 0
+const startingVelocity2 = 0
 
 let g = 2 //gravity
 let l1 = 1 //length to arm 
@@ -12,7 +22,7 @@ let m1 = 1 //mass of payload
 let m2 = 1
 
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
-let canvasMidpoint, canvasSize, circleConstant, pendulumContainer, trailCtx
+let canvasMidpoint, circleConstant, trailCtx
 const pi = Math.PI; const tau = pi * 2
 
 let pendulumCount = 0
@@ -29,23 +39,17 @@ if (document.readyState === "complete" || document.readyState === "interactive")
     document.addEventListener('DOMContentLoaded', init)
 }
 
+
 function init() {
-    canvasSize = Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.8)
-    pendulumContainer = document.getElementById('containCanvas')
+    const generateColor = (subDiv, n) => `hsl(${360 / subDiv * n - hslOffsetDeg}deg, 100%, 50%)`
     trailCtx = document.getElementById('trails').getContext('2d')
     
     canvasMidpoint = 0.5 * canvasSize
     circleConstant = relativeCircleSize * canvasSize
 
-    createPendulum(2, 2.500, 0, 0, '#8080FF') // TODO fancy colors, number and delta selecter
-    createPendulum(2, 2.501, 0, 0, '#8080FF') // TODO also environment slider
-    createPendulum(2, 2.502, 0, 0, '#8080FF')
-    createPendulum(2, 2.503, 0, 0, '#8080FF')
-    createPendulum(2, 2.504, 0, 0, '#8080FF')
-    // createPendulum(2, 2.505, 0, 0, '#8080FF')
-    // createPendulum(2, 2.506, 0, 0, '#8080FF')
-    // createPendulum(2, 2.507, 0, 0, '#8080FF')
-    // createPendulum(2, 2.508, 0, 0, '#8080FF')
+    for (let i = 0; i < pendulumNumber; i++) {
+        createPendulum(startingAngle, startingAngle + startingAngleDelta * i, startingVelocity1, startingVelocity2, generateColor(pendulumNumber, i))
+    }
 
     animate()
 }
