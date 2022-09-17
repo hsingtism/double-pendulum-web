@@ -1,25 +1,34 @@
-const iterationPerFrame = 20 // iterationPerFrame/iterationSubdivision*60 = simulation times real time, iterationPerFrame
+// get starting parameters
+let parsedHash
+try {
+    parsedHash = JSON.parse(decodeURIComponent(location.hash))
+} catch {
+    parsedHash = {}
+}
+
+const startingAngle      = parsedHash.startingAngle || 2
+const startingAngleDelta = parsedHash.startingAngleDelta || 0.01
+const pendulumNumber     = parsedHash.pendulumNumber || 3
+const hslOffsetDeg       = parsedHash.hslOffsetDeg || 30
+
+const startingVelocity1  = parsedHash.startingVelocity1 || 0
+const startingVelocity2  = parsedHash.startingVelocity2 || 0
+
+let g = parsedHash.g || 2 //gravity
+let l1 = parsedHash.l1 || 1 //length to arm 
+let l2 = parsedHash.l2 || 1
+let m1 = parsedHash.m1 || 1 //mass of payload
+let m2 = parsedHash.m2 || 1
+
+
+// 
+const iterationPerFrame = 30 // iterationPerFrame/iterationSubdivision*60 = simulation times real time, iterationPerFrame
 const simulationSpeedInverse = 30
 const lineWidth = 4
 const relativeCircleSize = 0.04
 
-const trailColorDecayOverlay = '#00000002'
-
-// TODO make these user defined and framerate counter
-const startingAngle = 2
-const startingAngleDelta = 0.01
-const pendulumNumber = 3
-const hslOffsetDeg = 30
-
 const canvasSize = 1000
-const startingVelocity1 = 0
-const startingVelocity2 = 0
-
-let g = 2 //gravity
-let l1 = 1 //length to arm 
-let l2 = 1
-let m1 = 1 //mass of payload
-let m2 = 1
+const trailColorDecayOverlay = '#00000008'
 
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
 let canvasMidpoint, circleConstant, trailCtx
@@ -87,7 +96,9 @@ function iterateFrame() {
 
 function animate() {
     let pendulumRadius
+    const performanceDisplay = document.getElementById('renderTime')
     function update() {
+        let t1 = performance.now()
         if (halt) { halt = false; return }
         window.requestAnimationFrame(update)
         iterateFrame()
@@ -108,6 +119,7 @@ function animate() {
             ball(workingContext, c[2], c[3], m2)
             trailDraw(c[2], c[3], workingContext.fillStyle)
         }
+        performanceDisplay.innerText = `rendered in ${(performance.now() - t1).toFixed(5)}ms`
     }
     window.requestAnimationFrame(update)
 }

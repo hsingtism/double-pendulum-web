@@ -6,10 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Double pendulum</title>
+    <meta name="description" content="A double pendulum simulator">
+    <meta name="keywords" content="double pendulum, chaos theory, simulation, pendulum">
     <style>
         body {
             background-color: #000000;
             color: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         canvas {
@@ -18,8 +21,38 @@
             left: 50%;
             transform: translate(-50%, -50%);
             border: 1px solid #80808000;
-            width: calc(min(100vh, 100vw) * 0.9);
-            height: calc(min(100vh, 100vw) * 0.9);
+            width: min(calc(min(100vh, 100vw) * 0.9), 1000px);
+            height: min(calc(min(100vh, 100vw) * 0.9), 1000px);
+        }
+
+        #performanceDisplay {
+            position: absolute;
+            width: max-content;
+            left: 100%;
+            top: 0;
+            transform: translate(-100%, 0);
+        }
+
+        #performanceDisplay > p {
+            margin: 0;
+            color: #808080;
+            font-family: monospace;
+            font-size: 10.5px;
+            text-align: right;
+        }
+
+        #performanceDisplay > p > a {
+            color: #a0a0a0;
+        }
+
+        #parameter {
+            border: 1px solid red;
+            display: none;
+        }
+
+        button {
+            background: #ffffff40;
+            color: #ffffff;
         }
     </style>
     <script async src="physics.js"></script>
@@ -27,6 +60,50 @@
 </head>
 
 <body>
+    <div id="performanceDisplay">
+        <p>made by <a href="https://hsing.org">Hsing Lo</a></p>
+        <p id="renderTime"></p>
+    </div>
+    <div id="alwaysPresent">
+        <button id="showHideOptions">show options</button>
+    </div>
+    <div id="parameter">
+        <h1>Double Pendulum Simulator</h1>
+        <h2>Select starting parameters</h2>
+        <p>Number of pendulums (1-8)</p>
+        <p>Starting angle (radians; counterclockwise, 0 is down)</p>
+        <p>Difference in starting angle (radians)</p>
+        <p>Hue offset (hsl degrees)</p>
+        <p>Display frame rate</p>
+
+        <h2>Advanced</h2>
+        <p>Arm 1 length</p>
+        <p>Arm 2 length</p>
+        <p>Mass 1 mass</p>
+        <p>Mass 2 mass</p>
+        <p>Mass 1 starting velocity</p>
+        <p>Mass 2 starting velocity</p>
+        <p>Gravity</p>
+        <button>restart simulation</button>
+    </div>
+    <script>
+        let optionShown = false
+        const showHideOption = document.getElementById('showHideOptions')
+        const parameterBox = document.getElementById('parameter')
+
+        showHideOption.addEventListener('click', () => {
+            if (optionShown) {
+                showHideOption.innerText = 'show options'
+                parameterBox.style.display = 'none'
+            } else {
+                showHideOption.innerText = 'hide options'
+                parameterBox.style.display = 'block'
+            }
+            optionShown = !optionShown
+        })
+
+        const userOptions = {}
+    </script>
     <div id="containCanvas">
         <!-- this is needed because js generated canvas doesn't render right, or maybe i am do something wrong
         i am probably doing something wrong but we're gonna blame it on the browser -->
