@@ -8,52 +8,7 @@
     <title>Double pendulum</title>
     <meta name="description" content="A double pendulum simulator">
     <meta name="keywords" content="double pendulum, chaos theory, simulation, pendulum">
-    <style>
-        body {
-            background-color: #000000;
-            color: #ffffff;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        canvas {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 1px solid #80808000;
-            width: min(calc(min(100vh, 100vw) * 0.9), 1000px);
-            height: min(calc(min(100vh, 100vw) * 0.9), 1000px);
-        }
-
-        #performanceDisplay {
-            position: absolute;
-            width: max-content;
-            left: 100%;
-            top: 0;
-            transform: translate(-100%, 0);
-        }
-
-        #performanceDisplay > p {
-            margin: 0;
-            color: #808080;
-            font-family: monospace;
-            font-size: 10.5px;
-            text-align: right;
-        }
-
-        #performanceDisplay > p > a {
-            color: #a0a0a0;
-        }
-
-        #parameter {
-            display: none;
-        }
-
-        button {
-            background: #ffffff20;
-            color: #a0a0a0;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
     <script async src="physics.js"></script>
     <script async src="animation.js"></script>
 </head>
@@ -67,24 +22,51 @@
         <button id="showHideOptions">show options</button>
     </div>
     <div id="parameter">
+        <!-- TODO make this work, use forms probably, encode into a hash, see animations.js -->
         <h1>Double Pendulum Simulator</h1>
-        <h2>Select starting parameters</h2>
-        <p>Number of pendulums (1-8)</p>
-        <p>Iteration per frame</p>
-        <p>Starting angle (radians; counterclockwise, 0 is down)</p>
-        <p>Difference in starting angle (radians)</p>
-        <p>Hue offset (hsl degrees)</p>
-        <p>Display frame rate</p>
+        <h2>Select starting parameters</h2> 
+        <br><label for="pendulumNumber">Number of pendulums (1-8)</label>
+        <br><select name="Number of pendulums" id="pendulumNumber">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="3" selected>3</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+        </select>
 
-        <h2>Advanced</h2>
-        <p>Arm 1 length</p>
-        <p>Arm 2 length</p>
-        <p>Mass 1 mass</p>
-        <p>Mass 2 mass</p>
-        <p>Mass 1 starting velocity</p>
-        <p>Mass 2 starting velocity</p>
-        <p>Gravity</p>
-        <button>restart simulation</button>
+        <br><label for="iterationPerFrame">Iteration per frame<br><small>The higher the number, the less error the simulation picks up. Recommended at 1000.</small></label>
+        <br><input type="number" id="iterationPerFrame">
+
+        <br><label for="startingAngle">Starting angle<br><small>In radians; counterclockwise; 0 is hanging</small></label>
+        <br><input type="number" id="startingAngle">
+
+        <br><label for="startingAngleDelta">Difference in starting angle (radians)</label>
+        <br><input type="number" id="startingAngleDelta">
+
+        <br><label for="hslOffsetDeg">Hue offset (hsl degrees; 0 - 180)</label>
+        <br><input type="number" id="hslOffsetDeg">
+
+        <br><label for="displayFrameRate">Display frame rate</label>
+        <br><select name="Frame rate toggle" id="displayFrameRate">
+            <option value="1" selected>True</option>
+            <option value="0">False</option>
+        </select>
+        <br><button id="restartSimulation1">restart simulation</button>
+
+        <h2>Advanced (click to set)</h2>
+        <!-- TODO make these call promptValue -->
+        <label id="l1">Arm 1 length</label> 
+        <br><label id="l2">Arm 2 length</label>
+        <br><label id="m1">Mass 1 mass</label>
+        <br><label id="m2">Mass 2 mass</label>
+        <br><label id="v1">Mass 1 starting velocity</label>
+        <br><label id="v2">Mass 2 starting velocity</label>
+        <br><label id="g">Gravity</label>
+        <br><button id="restartSimulation2">restart simulation</button>
+
     </div>
     <script>
         let optionShown = false
@@ -102,7 +84,40 @@
             optionShown = !optionShown
         })
 
+
         const userOptions = {}
+        
+        function parameterSubmit() {
+            const valuesToGet = [
+                'iterationPerFrame',
+                'startingAngle',
+                'startingAngleDelta',
+                'hslOffsetDeg',
+                'displayFrameRate'
+            ] // element ID and object key value (must match)
+            // TODO grab value with this
+        
+            window.location.hash = encodeURIComponent(JSON.stringify(userOptions))
+            window.location.reload()
+        }
+
+        function promptValue(key, value) {
+            const input = prompt(`changing ${key}, enter value`)
+            setParameter(key, input) 
+        }
+
+        function setParameter(key, value) {
+            value.trim()
+            value = Number(value)
+            if (!Number.isFinite(value)) {
+                alert('cannot parse entered value; please enter a number')
+            }
+            userOptions.key = value
+        }
+
+        document.getElementById('restartSimulation1').addEventListener('click', parameterSubmit)
+        document.getElementById('restartSimulation2').addEventListener('click', parameterSubmit)
+
     </script>
     <div id="containCanvas">
         <!-- this is needed because js generated canvas doesn't render right, or maybe i am do something wrong
@@ -119,5 +134,4 @@
         <canvas id="0008" width="1000px" height="1000px" style="z-index:8;"></canvas>
     </div>
 </body>
-
 </html>

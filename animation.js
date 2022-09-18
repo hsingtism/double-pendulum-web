@@ -6,21 +6,21 @@ try {
     parsedHash = {}
 }
 
+const pendulumNumber     = parsedHash.pendulumNumber || 8
+const iterationPerFrame  = parsedHash.iterationPerFrame || 1000 // iterationPerFrame/iterationSubdivision*60 = simulation times real time, iterationPerFrame
 const startingAngle      = parsedHash.startingAngle || 2
 const startingAngleDelta = parsedHash.startingAngleDelta || 0.01
-const pendulumNumber     = parsedHash.pendulumNumber || 8
 const hslOffsetDeg       = parsedHash.hslOffsetDeg || 30
+const displayFrameRate   = parsedHash.displayFrameRate ?? true
 
-const startingVelocity1  = parsedHash.startingVelocity1 || 0
-const startingVelocity2  = parsedHash.startingVelocity2 || 0
-
-let g = parsedHash.g || 1 //gravity
 let l1 = parsedHash.l1 || 1 //length to arm 
 let l2 = parsedHash.l2 || 1
 let m1 = parsedHash.m1 || 1 //mass of payload
 let m2 = parsedHash.m2 || 1
+const startingVelocity1  = parsedHash.startingVelocity1 || 0
+const startingVelocity2  = parsedHash.startingVelocity2 || 0
+let g = parsedHash.g || 1 //gravity
 
-const iterationPerFrame = parsedHash.iterationPerFrame || 1000 // iterationPerFrame/iterationSubdivision*60 = simulation times real time, iterationPerFrame
 
 // 
 const simulationSpeedInverse = 20
@@ -119,7 +119,7 @@ function animate() {
             ball(workingContext, c[2], c[3], m2)
             trailDraw(c[2], c[3], workingContext.fillStyle)
         }
-        performanceDisplay.innerText = `rendered in ${(performance.now() - t1).toFixed(5)}ms`
+        if (displayFrameRate) performanceDisplay.innerText = `rendered in ${(performance.now() - t1).toFixed(5)}ms`
     }
     window.requestAnimationFrame(update)
 }
