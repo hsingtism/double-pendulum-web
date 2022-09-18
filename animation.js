@@ -84,7 +84,27 @@ function createPendulum(_p1, _p2, _v1, _v2, _color) {
 }
 
 function iterateFrame() {
-    for(let m = 0; m < iterationPerFrame; m++) 
+    for(let m = 0; m < iterationPerFrame; m++) {
+
+        { // analyzing simulation discrepancy
+            if (m === 0) {
+                var _angleAMH1 = p1
+                var _angleAMH2 = p2
+            } 
+            if (m === 1) {
+                var _angularVelocity1 = v1
+                var _angularVelocity2 = v2
+                var _angle1 = p1
+                var _angle2 = p2
+                var _g = g
+                var _l1 = l1
+                var _l2 = l2
+                var _m1 = m1
+                var _m2 = m2
+                simulationDiscrepancyManager(_angleAMH1, _angleAMH2, _angularVelocity1, _angularVelocity2, _angle1, _angle2, _g, _l1, _l2, _m1, _m2)
+            }
+        }
+
         for(let i = 0; i < pendulumCount; i++) {
             const iterationReturn = iterate(iterationSubdivision, p1[i], p2[i], v1[i], v2[i], g, l1, l2)
             p1[i] = iterationReturn[0]
@@ -92,6 +112,7 @@ function iterateFrame() {
             v1[i] = iterationReturn[2]
             v2[i] = iterationReturn[3]
         }
+    }
 }
 
 function animate() {
