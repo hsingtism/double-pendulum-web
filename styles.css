@@ -20,6 +20,7 @@ canvas {
     border: 1px solid #80808000;
     width: min(calc(min(100vh, 100vw) * 0.9), 1000px);
     height: min(calc(min(100vh, 100vw) * 0.9), 1000px);
+    pointer-events: none;
 }
 
 #performanceDisplay {
@@ -44,6 +45,7 @@ canvas {
 
 #parameter {
     display: none;
+    z-index: 100;
 }
 
 #parameter>input,

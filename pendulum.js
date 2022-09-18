@@ -1,3 +1,4 @@
+/*--------------------------------*/
 // get starting parameters
 let parsedHash
 try {
@@ -23,8 +24,8 @@ const startingVelocity1  = parsedHash.startingVelocity1 || 0
 const startingVelocity2  = parsedHash.startingVelocity2 || 0
 let g = parsedHash.g || 1 //gravity
 
-
-// 
+/*--------------------------------*/
+// animations and stuff
 const simulationSpeedInverse = 20
 const lineWidth = 4
 const relativeCircleSize = 0.04
@@ -159,4 +160,110 @@ function trailDraw(x, y, color) {
 
 function clear(ctx) {
     ctx.clearRect(0, 0, canvasSize, canvasSize)
+}
+
+/*--------------------------------*/
+// physics functions
+const sin = Math.sin
+const cos = Math.cos
+
+function iterate(nInverse, p1_p, p2_p, p1_v, p2_v, g, l1, l2) {
+    // equations taken from https://www.myphysicslab.com/pendulum/double-pendulum-en.html
+    const p1_a = (-g * (2 * m1 + m2) * sin(p1_p)
+        - m2 * g * sin(p1_p - 2 * p2_p)
+        - 2 * sin(p1_p - p2_p) * m2 * (p2_v * p2_v * l2 + p1_v * p1_v * l1 * cos(p1_p - p2_p)))
+        / (l1 * (2 * m1 + m2 - m2 * cos(2 * p1_p - 2 * p2_p)))
+    const p2_a = (2 * sin(p1_p - p2_p) * (p1_v * p1_v * l1 * (m1 + m2) + g * (m1 + m2) * cos(p1_p) + p2_v * p2_v * l2 * m2 * cos(p1_p - p2_p)))
+        / (l2 * (2 * m1 + m2 - m2 * cos(2 * p1_p - 2 * p2_p)))
+
+    p1_v += p1_a / nInverse
+    p2_v += p2_a / nInverse
+    p1_p += p1_v / nInverse
+    p2_p += p2_v / nInverse
+
+    return [p1_p, p2_p, p1_v, p2_v]
+}
+
+function toCartesian(p1_p, p2_p, l1, l2) {
+    const p1_x = l1 * sin(p1_p)
+    const p1_y = l1 * cos(p1_p)
+    const p2_x = p1_x + l2 * sin(p2_p)
+    const p2_y = p1_y + l2 * cos(p2_p)
+    return [p1_x, p1_y, p2_x, p2_y]
+}
+
+/*--------------------------------*/
+// user interactions
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    initializeUserInteractions()
+} else {
+    document.addEventListener('DOMContentLoaded', initializeUserInteractions)
+}
+
+function initializeUserInteractions() {
+    let optionShown = false
+    const showHideOption = document.getElementById('showHideOptions')
+    const parameterBox = document.getElementById('parameter')
+
+    showHideOption.addEventListener('click', () => {
+        if (optionShown) {
+            showHideOption.innerText = 'show options'
+            parameterBox.style.display = 'none'
+        } else {
+            showHideOption.innerText = 'hide options'
+            parameterBox.style.display = 'block'
+        }
+        optionShown = !optionShown
+    })
+
+    const ELToAttach = ['l1', 'l2', 'm1', 'm2', 'v1', 'v2', 'g']
+    for (let i = 0; i < ELToAttach.length; i++) {
+        document.getElementById(ELToAttach[i]).addEventListener('click', () => {
+            promptValue(ELToAttach[i])
+        })
+    }
+
+    const userOptions = {}
+
+    function parameterSubmit() {
+        const valuesToGet = [
+            'pendulumNumber',
+            'iterationPerFrame',
+            'startingAngle',
+            'startingAngleDelta',
+            'hslOffsetDeg',
+            'displayFrameRate'
+        ] // element ID and object key value (must match)
+        for (let i = 0; i < valuesToGet.length; i++) {
+            setParameter(valuesToGet[i], document.getElementById(valuesToGet[i]).value)
+        }
+
+        window.location.hash = encodeURIComponent(JSON.stringify(userOptions))
+        window.location.reload()
+    }
+
+    function promptValue(key) {
+        const input = prompt(`changing ${key}, enter value`)
+        setParameter(key, input)
+    }
+
+    function setParameter(key, value) {
+        if (value.length == 0) return
+        console.trace()
+        console.log(value)
+        value = Number(value)
+        if (!Number.isFinite(value)) {
+            alert('cannot parse entered value; please enter a number')
+        }
+        userOptions[key] = value
+    }
+
+    function hardResetReload() {
+        window.location.hash = ''
+        window.location.reload()
+    }
+
+    document.getElementById('restartSimulation').addEventListener('click', parameterSubmit)
+    document.getElementById('hardReset').addEventListener('click', hardResetReload)
+
 }

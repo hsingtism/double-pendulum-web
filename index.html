@@ -9,8 +9,7 @@
     <meta name="description" content="A double pendulum simulator">
     <meta name="keywords" content="double pendulum, chaos theory, simulation, pendulum">
     <link rel="stylesheet" href="styles.css">
-    <script async src="physics.js"></script>
-    <script async src="animation.js"></script>
+    <script async src="pendulum.js"></script>
 </head>
 
 <body>
@@ -18,7 +17,7 @@
         <p>made by <a href="https://hsing.org">Hsing Lo</a></p>
         <p id="renderTime"></p>
     </div>
-    <div id="alwaysPresent">
+    <div>
         <button id="showHideOptions">show options</button>
     </div>
     <div id="parameter">
@@ -68,75 +67,7 @@
         <br>
         <br><button id="restartSimulation">use specified parameters</button>
         <br><button id="hardReset">revert to default parameters</button>
-
     </div>
-    <script>
-        let optionShown = false
-        const showHideOption = document.getElementById('showHideOptions')
-        const parameterBox = document.getElementById('parameter')
-
-        showHideOption.addEventListener('click', () => {
-            if (optionShown) {
-                showHideOption.innerText = 'show options'
-                parameterBox.style.display = 'none'
-            } else {
-                showHideOption.innerText = 'hide options'
-                parameterBox.style.display = 'block'
-            }
-            optionShown = !optionShown
-        })
-
-        const ELToAttach = ['l1', 'l2', 'm1', 'm2', 'v1', 'v2', 'g']
-        for (let i = 0; i < ELToAttach.length; i++) {
-            document.getElementById(ELToAttach[i]).addEventListener('click', () => {
-                promptValue(ELToAttach[i])
-            })
-        }
-
-        const userOptions = {}
-
-        function parameterSubmit() {
-            const valuesToGet = [
-                'pendulumNumber',
-                'iterationPerFrame',
-                'startingAngle',
-                'startingAngleDelta',
-                'hslOffsetDeg',
-                'displayFrameRate'
-            ] // element ID and object key value (must match)
-            for (let i = 0; i < valuesToGet.length; i++) {
-                setParameter(valuesToGet[i], document.getElementById(valuesToGet[i]).value)
-            }
-
-            window.location.hash = encodeURIComponent(JSON.stringify(userOptions))
-            window.location.reload()
-        }
-
-        function promptValue(key) {
-            const input = prompt(`changing ${key}, enter value`)
-            setParameter(key, input)
-        }
-
-        function setParameter(key, value) {
-            if (value.length == 0) return
-            console.trace()
-            console.log(value)
-            value = Number(value)
-            if (!Number.isFinite(value)) {
-                alert('cannot parse entered value; please enter a number')
-            }
-            userOptions[key] = value
-        }
-
-        function hardResetReload() {
-            window.location.hash = ''
-            window.location.reload()
-        } 
-
-        document.getElementById('restartSimulation').addEventListener('click', parameterSubmit)
-        document.getElementById('hardReset').addEventListener('click', hardResetReload)
-
-    </script>
     <div id="containCanvas">
         <!-- this is needed because js generated canvas doesn't render right, or maybe i am do something wrong
         i am probably doing something wrong but we're gonna blame it on the browser -->
