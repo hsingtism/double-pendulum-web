@@ -1,12 +1,14 @@
 // get starting parameters
 let parsedHash
 try {
-    parsedHash = JSON.parse(decodeURIComponent(location.hash))
+    let hash = window.location.hash
+    if (hash[0] == '#') hash = hash.substring(1)
+    parsedHash = JSON.parse(decodeURIComponent(hash))
 } catch {
     parsedHash = {}
 }
 
-const pendulumNumber     = parsedHash.pendulumNumber || 8
+const pendulumNumber     = parsedHash.pendulumNumber || 3
 const iterationPerFrame  = parsedHash.iterationPerFrame || 1000 // iterationPerFrame/iterationSubdivision*60 = simulation times real time, iterationPerFrame
 const startingAngle      = parsedHash.startingAngle || 2
 const startingAngleDelta = parsedHash.startingAngleDelta || 0.01
@@ -28,7 +30,7 @@ const lineWidth = 4
 const relativeCircleSize = 0.04
 
 const canvasSize = 1000
-const trailColorDecayOverlay = '#00000008'
+const trailColorDecayOverlay = '#00000002'
 
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
 let canvasMidpoint, circleConstant, trailCtx
@@ -119,7 +121,7 @@ function animate() {
             ball(workingContext, c[2], c[3], m2)
             trailDraw(c[2], c[3], workingContext.fillStyle)
         }
-        if (displayFrameRate) performanceDisplay.innerText = `rendered in ${(performance.now() - t1).toFixed(5)}ms`
+        if (displayFrameRate) performanceDisplay.innerText = `frame: ${(performance.now() - t1).toFixed(5)}ms`
     }
     window.requestAnimationFrame(update)
 }

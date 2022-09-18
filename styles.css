@@ -4,6 +4,14 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+h1 {
+    font-size: 1.5rem;
+}
+
+h2 {
+    font-size: 1rem;
+}
+
 canvas {
     position: absolute;
     top: 50%;
@@ -26,7 +34,7 @@ canvas {
     margin: 0;
     color: #808080;
     font-family: monospace;
-    font-size: 10.5px;
+    font-size: 10.5px !important;
     text-align: right;
 }
 
@@ -39,14 +47,26 @@ canvas {
 }
 
 #parameter>input,
-select {
+#parameter>select {
     margin-bottom: 10px;
+    background-color: #202020;
+    border: none;
+    color: #ffffff;
 }
 
 #parameter>button {
-    font-size: 16px;
+    font-size: 14px;
     background: #ffffffa0;
     color: #202020;
+}
+
+#parameter>label,#parameter>a {
+    margin: 0;
+    font-size: 14px;
+}
+
+#parameter>a {
+    text-decoration: underline;
 }
 
 button {
@@ -66,4 +86,20 @@ h2 {
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: #00000000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #808080;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ffffff;
 }

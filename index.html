@@ -24,8 +24,8 @@
     <div id="parameter">
         <!-- TODO make this work, use forms probably, encode into a hash, see animations.js -->
         <h1>Double Pendulum Simulator</h1>
-        <h2>Select starting parameters</h2> 
-        <br><label for="pendulumNumber">Number of pendulums (1-8)</label>
+        <h2>Select starting parameters</h2>
+        <label for="pendulumNumber">Number of pendulums (1-8)</label>
         <br><select name="Number of pendulums" id="pendulumNumber">
             <option value="1">1</option>
             <option value="2">2</option>
@@ -37,16 +37,18 @@
             <option value="8">8</option>
         </select>
 
-        <br><label for="iterationPerFrame">Iteration per frame<br><small>The higher the number, the less error the simulation picks up. Recommended at 1000.</small></label>
+        <br><label for="iterationPerFrame">Iteration per frame<br><small>The higher the number, the less error the
+                simulation picks up. Recommended at 1000.</small></label>
         <br><input type="number" id="iterationPerFrame">
 
-        <br><label for="startingAngle">Starting angle<br><small>In radians; counterclockwise; 0 is hanging</small></label>
+        <br><label for="startingAngle">Starting angle<br><small>In radians; counterclockwise; 0 is
+                hanging. Default: 2</small></label>
         <br><input type="number" id="startingAngle">
 
-        <br><label for="startingAngleDelta">Difference in starting angle (radians)</label>
+        <br><label for="startingAngleDelta">Difference in starting angle<br><small>Radians. Default: 0.01</small></label>
         <br><input type="number" id="startingAngleDelta">
 
-        <br><label for="hslOffsetDeg">Hue offset (hsl degrees; 0 - 180)</label>
+        <br><label for="hslOffsetDeg">Hue offset<br><small>HSL degrees, 0-180. Default: 30</small></label>
         <br><input type="number" id="hslOffsetDeg">
 
         <br><label for="displayFrameRate">Display frame rate</label>
@@ -54,18 +56,18 @@
             <option value="1" selected>True</option>
             <option value="0">False</option>
         </select>
-        <br><button id="restartSimulation1">restart simulation</button>
 
-        <h2>Advanced (click to set)</h2>
-        <!-- TODO make these call promptValue -->
-        <label id="l1">Arm 1 length</label> 
-        <br><label id="l2">Arm 2 length</label>
-        <br><label id="m1">Mass 1 mass</label>
-        <br><label id="m2">Mass 2 mass</label>
-        <br><label id="v1">Mass 1 starting velocity</label>
-        <br><label id="v2">Mass 2 starting velocity</label>
-        <br><label id="g">Gravity</label>
-        <br><button id="restartSimulation2">restart simulation</button>
+        <h2>Environment (click to set)</h2>
+        <a id="l1">Arm 1 length;</a>
+        <a id="l2">Arm 2 length;</a>
+        <br><a id="m1">Mass 1 mass;</a>
+        <a id="m2">Mass 2 mass;</a>
+        <br><a id="v1">Mass 1 starting velocity;</a>
+        <a id="v2">Mass 2 starting velocity;</a>
+        <br><a id="g">Gravity;</a>
+        <br>
+        <br><button id="restartSimulation">use specified parameters</button>
+        <br><button id="hardReset">revert to default parameters</button>
 
     </div>
     <script>
@@ -84,39 +86,55 @@
             optionShown = !optionShown
         })
 
+        const ELToAttach = ['l1', 'l2', 'm1', 'm2', 'v1', 'v2', 'g']
+        for (let i = 0; i < ELToAttach.length; i++) {
+            document.getElementById(ELToAttach[i]).addEventListener('click', () => {
+                promptValue(ELToAttach[i])
+            })
+        }
 
         const userOptions = {}
-        
+
         function parameterSubmit() {
             const valuesToGet = [
+                'pendulumNumber',
                 'iterationPerFrame',
                 'startingAngle',
                 'startingAngleDelta',
                 'hslOffsetDeg',
                 'displayFrameRate'
             ] // element ID and object key value (must match)
-            // TODO grab value with this
-        
+            for (let i = 0; i < valuesToGet.length; i++) {
+                setParameter(valuesToGet[i], document.getElementById(valuesToGet[i]).value)
+            }
+
             window.location.hash = encodeURIComponent(JSON.stringify(userOptions))
             window.location.reload()
         }
 
-        function promptValue(key, value) {
+        function promptValue(key) {
             const input = prompt(`changing ${key}, enter value`)
-            setParameter(key, input) 
+            setParameter(key, input)
         }
 
         function setParameter(key, value) {
-            value.trim()
+            if (value.length == 0) return
+            console.trace()
+            console.log(value)
             value = Number(value)
             if (!Number.isFinite(value)) {
                 alert('cannot parse entered value; please enter a number')
             }
-            userOptions.key = value
+            userOptions[key] = value
         }
 
-        document.getElementById('restartSimulation1').addEventListener('click', parameterSubmit)
-        document.getElementById('restartSimulation2').addEventListener('click', parameterSubmit)
+        function hardResetReload() {
+            window.location.hash = ''
+            window.location.reload()
+        } 
+
+        document.getElementById('restartSimulation').addEventListener('click', parameterSubmit)
+        document.getElementById('hardReset').addEventListener('click', hardResetReload)
 
     </script>
     <div id="containCanvas">
@@ -134,4 +152,5 @@
         <canvas id="0008" width="1000px" height="1000px" style="z-index:8;"></canvas>
     </div>
 </body>
+
 </html>
