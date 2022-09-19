@@ -14,17 +14,18 @@
 
 <body>
     <div id="performanceDisplay">
-        <p>made by <a href="https://hsing.org">Hsing Lo</a></p>
+        <p>made by <a href="https://hsing.org">Hsing Lo</a>
+        <br>equations from <a href="https://www.myphysicslab.com/pendulum/double-pendulum-en.html">myPhysicsLab</a></p>
         <p id="renderTime"></p>
     </div>
     <div>
         <button id="showHideOptions">show options</button>
     </div>
     <div id="parameter">
-        <!-- TODO make this work, use forms probably, encode into a hash, see animations.js -->
         <h1>Double Pendulum Simulator</h1>
         <h2>Select starting parameters</h2>
-        <label for="pendulumNumber">Number of pendulums (1-8)</label>
+
+        <label for="pendulumNumber">Number of pendulums</label>
         <br><select name="Number of pendulums" id="pendulumNumber">
             <option value="1">1</option>
             <option value="2">2</option>
@@ -34,17 +35,18 @@
             <option value="6">6</option>
             <option value="7">7</option>
             <option value="8">8</option>
+            <option value="-1">Custom (set when submitting parameters)</option>
         </select>
 
-        <br><label for="iterationPerFrame">Iteration per frame<br><small>The higher the number, the less error the
-                simulation picks up. Recommended at 1000.</small></label>
+        <br><label for="iterationPerFrame">Iteration per frame
+            <br><small>The higher the number, the less error the simulation picks up. Recommended: 1000.</small></label>
         <br><input type="number" id="iterationPerFrame">
 
-        <br><label for="startingAngle">Starting angle<br><small>In radians; counterclockwise; 0 is
-                hanging. Default: 2</small></label>
+        <br><label for="startingAngle">Starting angle
+            <br><small>In radians; counterclockwise; 0 is hanging. Default: 2</small></label>
         <br><input type="number" id="startingAngle">
 
-        <br><label for="startingAngleDelta">Difference in starting angle<br><small>Radians. Default: 0.01</small></label>
+        <br><label for="startingAngleDelta">Difference in starting angle<br><small>Radians. Default: 0.005</small></label>
         <br><input type="number" id="startingAngleDelta">
 
         <br><label for="hslOffsetDeg">Hue offset<br><small>HSL degrees, 0-180. Default: 30</small></label>
@@ -57,31 +59,18 @@
         </select>
 
         <h2>Environment (click to set)</h2>
-        <a id="l1">Arm 1 length;</a>
-        <a id="l2">Arm 2 length;</a>
-        <br><a id="m1">Mass 1 mass;</a>
-        <a id="m2">Mass 2 mass;</a>
-        <br><a id="v1">Mass 1 starting velocity;</a>
-        <a id="v2">Mass 2 starting velocity;</a>
+        
+        <a id="l1">Arm 1 length;</a><a id="l2">Arm 2 length;</a>
+        <br><a id="m1">Mass 1 mass;</a><a id="m2">Mass 2 mass;</a>
+        <br><a id="v1">Mass 1 starting velocity;</a><a id="v2">Mass 2 starting velocity;</a>
         <br><a id="g">Gravity;</a>
         <br>
+        
         <br><button id="restartSimulation">use specified parameters</button>
         <br><button id="hardReset">revert to default parameters</button>
     </div>
     <div id="containCanvas">
-        <!-- this is needed because js generated canvas doesn't render right, or maybe i am do something wrong
-        i am probably doing something wrong but we're gonna blame it on the browser -->
         <canvas id="trails" width="1000px" height="1000px" style="z-index:-10;"></canvas>
-        <canvas id="0000" width="1000px" height="1000px" style="z-index:0;"></canvas>
-        <canvas id="0001" width="1000px" height="1000px" style="z-index:1;"></canvas>
-        <canvas id="0002" width="1000px" height="1000px" style="z-index:2;"></canvas>
-        <canvas id="0003" width="1000px" height="1000px" style="z-index:3;"></canvas>
-        <canvas id="0004" width="1000px" height="1000px" style="z-index:4;"></canvas>
-        <canvas id="0005" width="1000px" height="1000px" style="z-index:5;"></canvas>
-        <canvas id="0006" width="1000px" height="1000px" style="z-index:6;"></canvas>
-        <canvas id="0007" width="1000px" height="1000px" style="z-index:7;"></canvas>
-        <canvas id="0008" width="1000px" height="1000px" style="z-index:8;"></canvas>
     </div>
 </body>
-
 </html>

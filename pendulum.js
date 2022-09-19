@@ -10,12 +10,13 @@ try {
 }
 
 const pendulumNumber     = parsedHash.pendulumNumber || 3
-const iterationPerFrame  = parsedHash.iterationPerFrame || 1000 // iterationPerFrame/iterationSubdivision*60 = simulation times real time, iterationPerFrame
+const iterationPerFrame  = parsedHash.iterationPerFrame || 1000 // iterationPerFrame/iterationSubdivision*60 = simulation times real time
 const startingAngle      = parsedHash.startingAngle || 2
-const startingAngleDelta = parsedHash.startingAngleDelta || 0.01
+const startingAngleDelta = parsedHash.startingAngleDelta || 0.005
 const hslOffsetDeg       = parsedHash.hslOffsetDeg || 30
 const displayFrameRate   = parsedHash.displayFrameRate ?? true
 
+// these environment variables can be changed mid-simulation
 let l1 = parsedHash.l1 || 1 //length to arm 
 let l2 = parsedHash.l2 || 1
 let m1 = parsedHash.m1 || 1 //mass of payload
@@ -26,12 +27,12 @@ let g = parsedHash.g || 1 //gravity
 
 /*--------------------------------*/
 // animations and stuff
-const simulationSpeedInverse = 20
+const simulationSpeedInverse = 20 //don't let the user touch this, let them change the environment parameters
 const lineWidth = 4
 const relativeCircleSize = 0.04
 
-const canvasSize = 1000
-const trailColorDecayOverlay = '#00000002'
+const canvasSize = 1000 //if this is to be changed, the attributes in the html needs to be changed to match. Canvas is always square
+const trailColorDecayOverlay = '#00000002' //black plus alpha. the more opaque the faster the trail decay
 
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
 let canvasMidpoint, circleConstant, trailCtx
@@ -53,6 +54,11 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 
 
 function init() {
+
+    let feedString = ''
+    for (let i = 0; i < pendulumNumber; i++) feedString += `<canvas id="${i.toString().padStart(4, '0')}" width="1000px" height="1000px" style="z-index:${i};"></canvas>`
+    document.getElementById('containCanvas').innerHTML += feedString
+
     const generateColor = (subDiv, n) => `hsl(${360 / subDiv * n - hslOffsetDeg}deg, 100%, 50%)`
     trailCtx = document.getElementById('trails').getContext('2d')
     
@@ -67,10 +73,6 @@ function init() {
 }
 
 function createPendulum(_p1, _p2, _v1, _v2, _color) {
-    if(pendulumCount == 9) {
-        alert('pendulum limit hit. function will be terminated')
-        return
-    }
     p1.push(_p1)
     p2.push(_p2)
     v1.push(_v1)
@@ -127,7 +129,7 @@ function animate() {
     window.requestAnimationFrame(update)
 }
 
-let halt = false
+let halt = false // call this to pause, call animate to restart
 function killAnimation() {
     halt = true
 }
@@ -164,6 +166,7 @@ function clear(ctx) {
 
 /*--------------------------------*/
 // physics functions
+// this section is to be kept purely functional from the rest of the script
 const sin = Math.sin
 const cos = Math.cos
 
@@ -194,6 +197,7 @@ function toCartesian(p1_p, p2_p, l1, l2) {
 
 /*--------------------------------*/
 // user interactions
+// this section is to be seprated from the other scripts; only interact with DOM or using JSON in hash
 if (document.readyState === "complete" || document.readyState === "interactive") {
     initializeUserInteractions()
 } else {
@@ -201,10 +205,9 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 }
 
 function initializeUserInteractions() {
-    let optionShown = false
     const showHideOption = document.getElementById('showHideOptions')
     const parameterBox = document.getElementById('parameter')
-
+    let optionShown = false
     showHideOption.addEventListener('click', () => {
         if (optionShown) {
             showHideOption.innerText = 'show options'
@@ -215,15 +218,28 @@ function initializeUserInteractions() {
         }
         optionShown = !optionShown
     })
+    
+    const userOptions = {}
+
+    function setParameter(key, value) {
+        if (value.length == 0) return
+        console.trace()
+        console.log(value)
+        value = Number(value)
+        if (!Number.isFinite(value)) {
+            alert('cannot parse entered value; please enter a number')
+        }
+        userOptions[key] = value
+    }
 
     const ELToAttach = ['l1', 'l2', 'm1', 'm2', 'v1', 'v2', 'g']
     for (let i = 0; i < ELToAttach.length; i++) {
         document.getElementById(ELToAttach[i]).addEventListener('click', () => {
-            promptValue(ELToAttach[i])
+            const key = ELToAttach[i]
+            const input = prompt(`changing ${key}, enter value`)
+            setParameter(key, input)
         })
     }
-
-    const userOptions = {}
 
     function parameterSubmit() {
         const valuesToGet = [
@@ -242,22 +258,6 @@ function initializeUserInteractions() {
         window.location.reload()
     }
 
-    function promptValue(key) {
-        const input = prompt(`changing ${key}, enter value`)
-        setParameter(key, input)
-    }
-
-    function setParameter(key, value) {
-        if (value.length == 0) return
-        console.trace()
-        console.log(value)
-        value = Number(value)
-        if (!Number.isFinite(value)) {
-            alert('cannot parse entered value; please enter a number')
-        }
-        userOptions[key] = value
-    }
-
     function hardResetReload() {
         window.location.hash = ''
         window.location.reload()
@@ -265,5 +265,4 @@ function initializeUserInteractions() {
 
     document.getElementById('restartSimulation').addEventListener('click', parameterSubmit)
     document.getElementById('hardReset').addEventListener('click', hardResetReload)
-
 }
