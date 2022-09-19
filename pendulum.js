@@ -31,7 +31,7 @@ const simulationSpeedInverse = 20 //don't let the user touch this, let them chan
 const lineWidth = 4
 const relativeCircleSize = 0.04
 
-const canvasSize = 1000 //if this is to be changed, the attributes in the html needs to be changed to match. Canvas is always square
+const canvasSize = 1000
 const trailColorDecayOverlay = '#00000002' //black plus alpha. the more opaque the faster the trail decay
 
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
@@ -54,9 +54,9 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 
 
 function init() {
-
-    let feedString = ''
-    for (let i = 0; i < pendulumNumber; i++) feedString += `<canvas id="${i.toString().padStart(4, '0')}" width="1000px" height="1000px" style="z-index:${i};"></canvas>`
+    let feedString = `<canvas id="trails" width="${canvasSize}px" height="${canvasSize}px" style="z-index:-10;"></canvas>`
+    for (let i = 0; i < pendulumNumber; i++) feedString 
+        += `<canvas id="${i.toString().padStart(4, '0')}" width="${canvasSize}px" height="${canvasSize}px" style="z-index:${i};"></canvas>`
     document.getElementById('containCanvas').innerHTML += feedString
 
     const generateColor = (subDiv, n) => `hsl(${360 / subDiv * n - hslOffsetDeg}deg, 100%, 50%)`
@@ -223,13 +223,13 @@ function initializeUserInteractions() {
 
     function setParameter(key, value) {
         if (value.length == 0) return
-        console.trace()
-        console.log(value)
         value = Number(value)
         if (!Number.isFinite(value)) {
             alert('cannot parse entered value; please enter a number')
+            return false
         }
         userOptions[key] = value
+        return true
     }
 
     const ELToAttach = ['l1', 'l2', 'm1', 'm2', 'v1', 'v2', 'g']
@@ -252,6 +252,11 @@ function initializeUserInteractions() {
         ] // element ID and object key value (must match)
         for (let i = 0; i < valuesToGet.length; i++) {
             setParameter(valuesToGet[i], document.getElementById(valuesToGet[i]).value)
+        }
+
+        if (userOptions.pendulumNumber == -1) {
+            const input = prompt('enter number of pendulums. more than 10 pendulums will impact animation smoothness on slower machines.')
+            if (!setParameter('pendulumNumber', input)) return
         }
 
         window.location.hash = encodeURIComponent(JSON.stringify(userOptions))
