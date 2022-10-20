@@ -58,8 +58,7 @@ function sleep(ms) {
 }
 
 async function init() {
-    let feedString = `<canvas id="trails" width="${canvasSize}px" height="${canvasSize}px" style="z-index:-10;"></canvas>`
-    feedString += `<canvas id="mainp" width="${canvasSize}px" height="${canvasSize}px" style="z-index:5;"></canvas>`
+    let feedString = `<canvas id="trails" width="${canvasSize}px" height="${canvasSize}px" style="z-index:-10;"></canvas><canvas id="mainp" width="${canvasSize}px" height="${canvasSize}px" style="z-index:5;"></canvas>`
     document.getElementById('containCanvas').innerHTML += feedString
     
     await sleep(0)
@@ -100,7 +99,7 @@ function iterateFrame() {
         }
 }
 
-let frameCount = 0
+let frameCount = 0 // for debug
 function animate() {
     let pendulumRadius, t1
     const performanceDisplay = document.getElementById('renderTime')
@@ -111,14 +110,13 @@ function animate() {
         clear(mainCanvas)
         trailFade()
         
-        // getting and scaling coordinates
         pendulumRadius = l1 + l2
         const scalingFactor = 0.4 * canvasSize / pendulumRadius
         
         for (let i = 0; i < pendulumCount; i++) {
             const simulationCoordinates = toCartesian(p1[i], p2[i], l1, l2)
             const c = simulationCoordinates.map(x => x * scalingFactor + canvasMidpoint)
-
+            
             mainCanvas.fillStyle = colors[i]
             mainCanvas.strokeStyle = colors[i]
             line(canvasMidpoint, canvasMidpoint, c[0], c[1])
@@ -127,10 +125,10 @@ function animate() {
             ball(c[2], c[3], m2)
             trailDraw(c[2], c[3], mainCanvas.fillStyle)
         }
+
         if (displayFrameRate) performanceDisplay.innerText = `frame: ${(performance.now() - t1).toFixed(4)}ms`
         t1 = performance.now()
         frameCount++
-        if(frameCount == 300) console.log(performance.now())
     }
     window.requestAnimationFrame(update)
 }
