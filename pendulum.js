@@ -32,7 +32,7 @@ const lineWidth = 4
 const relativeCircleSize = 0.04
 
 const canvasSize = 1000
-const trailColorDecayOverlay = '#00000002' //black plus alpha. the more opaque the faster the trail decay
+const trailColorDecayOverlay = '#00000004' //black plus alpha. the more opaque the faster the trail decay
 
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
 let canvasMidpoint, circleConstant, trailCtx
@@ -100,6 +100,7 @@ function iterateFrame() {
         }
 }
 
+let frameCount = 0
 function animate() {
     let pendulumRadius, t1
     const performanceDisplay = document.getElementById('renderTime')
@@ -108,25 +109,28 @@ function animate() {
         window.requestAnimationFrame(update)
         iterateFrame()
         clear(mainCanvas)
+        trailFade()
         
         // getting and scaling coordinates
         pendulumRadius = l1 + l2
         const scalingFactor = 0.4 * canvasSize / pendulumRadius
         
-        for(let i = 0; i < pendulumCount; i++) {
+        for (let i = 0; i < pendulumCount; i++) {
             const simulationCoordinates = toCartesian(p1[i], p2[i], l1, l2)
             const c = simulationCoordinates.map(x => x * scalingFactor + canvasMidpoint)
 
             mainCanvas.fillStyle = colors[i]
             mainCanvas.strokeStyle = colors[i]
-            line(mainCanvas, canvasMidpoint, canvasMidpoint, c[0], c[1])
-            ball(mainCanvas, c[0], c[1], m1)
-            line(mainCanvas, c[0], c[1], c[2], c[3])
-            ball(mainCanvas, c[2], c[3], m2)
+            line(canvasMidpoint, canvasMidpoint, c[0], c[1])
+            ball(c[0], c[1], m1)
+            line(c[0], c[1], c[2], c[3])
+            ball(c[2], c[3], m2)
             trailDraw(c[2], c[3], mainCanvas.fillStyle)
         }
         if (displayFrameRate) performanceDisplay.innerText = `frame: ${(performance.now() - t1).toFixed(4)}ms`
         t1 = performance.now()
+        frameCount++
+        if(frameCount == 300) console.log(performance.now())
     }
     window.requestAnimationFrame(update)
 }
@@ -136,18 +140,18 @@ function killAnimation() {
     halt = true
 }
 
-function ball(ctx, x, y, mass) {
+function ball(x, y, mass) {
     const circleRadius = circleConstant * Math.sqrt(mass) / (l1 + l2)
-    ctx.beginPath()
-    ctx.arc(x, y, circleRadius, 0, tau)
-    ctx.fill()
+    mainCanvas.beginPath()
+    mainCanvas.arc(x, y, circleRadius, 0, tau)
+    mainCanvas.fill()
 }
 
-function line(ctx, x1, y1, x2, y2) {
-    ctx.beginPath()
-    ctx.moveTo(x1, y1)
-    ctx.lineTo(x2, y2)
-    ctx.stroke()
+function line(x1, y1, x2, y2) {
+    mainCanvas.beginPath()
+    mainCanvas.moveTo(x1, y1)
+    mainCanvas.lineTo(x2, y2)
+    mainCanvas.stroke()
 }
 
 function trailDraw(x, y, color) {
@@ -155,11 +159,11 @@ function trailDraw(x, y, color) {
     trailCtx.beginPath()
     trailCtx.arc(x, y, 1, 0, tau)
     trailCtx.fill()
+}
 
-    trailCtx.save()
+function trailFade() {
     trailCtx.fillStyle = trailColorDecayOverlay
     trailCtx.fillRect(0, 0, canvasSize, canvasSize)
-    trailCtx.restore()
 }
 
 function clear(ctx) {
@@ -180,7 +184,6 @@ function iterate(nInverse, p1_p, p2_p, p1_v, p2_v, g, l1, l2) {
         / (l1 * (2 * m1 + m2 - m2 * cos(2 * p1_p - 2 * p2_p)))
     const p2_a = (2 * sin(p1_p - p2_p) * (p1_v * p1_v * l1 * (m1 + m2) + g * (m1 + m2) * cos(p1_p) + p2_v * p2_v * l2 * m2 * cos(p1_p - p2_p)))
         / (l2 * (2 * m1 + m2 - m2 * cos(2 * p1_p - 2 * p2_p)))
-
     p1_v += p1_a / nInverse
     p2_v += p2_a / nInverse
     p1_p += p1_v / nInverse
