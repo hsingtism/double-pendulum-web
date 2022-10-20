@@ -43,8 +43,7 @@ let p1 = []
 let p2 = []
 let v1 = []
 let v2 = []
-let canvasID = []
-let canvasContext = []
+let colors = []
 
 if (document.readyState === "complete" || document.readyState === "interactive") {
     init()
@@ -52,14 +51,21 @@ if (document.readyState === "complete" || document.readyState === "interactive")
     document.addEventListener('DOMContentLoaded', init)
 }
 
+let mainCanvas
 
-function init() {
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function init() {
     let feedString = `<canvas id="trails" width="${canvasSize}px" height="${canvasSize}px" style="z-index:-10;"></canvas>`
-    for (let i = 0; i < pendulumNumber; i++) feedString 
-        += `<canvas id="${i.toString().padStart(4, '0')}" width="${canvasSize}px" height="${canvasSize}px" style="z-index:${i};"></canvas>`
+    feedString += `<canvas id="mainp" width="${canvasSize}px" height="${canvasSize}px" style="z-index:5;"></canvas>`
     document.getElementById('containCanvas').innerHTML += feedString
+    
+    await sleep(0)
 
     const generateColor = (subDiv, n) => `hsl(${360 / subDiv * n - hslOffsetDeg}deg, 100%, 50%)`
+    mainCanvas = document.getElementById('mainp').getContext('2d')
     trailCtx = document.getElementById('trails').getContext('2d')
     
     canvasMidpoint = 0.5 * canvasSize
@@ -77,14 +83,9 @@ function createPendulum(_p1, _p2, _v1, _v2, _color) {
     p2.push(_p2)
     v1.push(_v1)
     v2.push(_v2)
-    const id = pendulumCount.toString().padStart(4, '0')
-    canvasID.push(id)
-    const tempContext = document.getElementById(id).getContext('2d')
-    tempContext.globalAlpha = 0.75
-    tempContext.fillStyle = _color
-    tempContext.strokeStyle = _color
-    tempContext.lineWidth = lineWidth
-    canvasContext.push(tempContext)
+    colors.push(_color)
+    mainCanvas.globalAlpha = 0.75
+    mainCanvas.lineWidth = lineWidth
     pendulumCount++
 }
 
@@ -106,6 +107,7 @@ function animate() {
         if (halt) { halt = false; return }
         window.requestAnimationFrame(update)
         iterateFrame()
+        clear(mainCanvas)
         
         // getting and scaling coordinates
         pendulumRadius = l1 + l2
@@ -114,14 +116,14 @@ function animate() {
         for(let i = 0; i < pendulumCount; i++) {
             const simulationCoordinates = toCartesian(p1[i], p2[i], l1, l2)
             const c = simulationCoordinates.map(x => x * scalingFactor + canvasMidpoint)
-            const workingContext = canvasContext[i]
 
-            clear(workingContext)
-            line(workingContext, canvasMidpoint, canvasMidpoint, c[0], c[1])
-            ball(workingContext, c[0], c[1], m1)
-            line(workingContext, c[0], c[1], c[2], c[3])
-            ball(workingContext, c[2], c[3], m2)
-            trailDraw(c[2], c[3], workingContext.fillStyle)
+            mainCanvas.fillStyle = colors[i]
+            mainCanvas.strokeStyle = colors[i]
+            line(mainCanvas, canvasMidpoint, canvasMidpoint, c[0], c[1])
+            ball(mainCanvas, c[0], c[1], m1)
+            line(mainCanvas, c[0], c[1], c[2], c[3])
+            ball(mainCanvas, c[2], c[3], m2)
+            trailDraw(c[2], c[3], mainCanvas.fillStyle)
         }
         if (displayFrameRate) performanceDisplay.innerText = `frame: ${(performance.now() - t1).toFixed(4)}ms`
         t1 = performance.now()
@@ -255,7 +257,7 @@ function initializeUserInteractions() {
         }
 
         if (userOptions.pendulumNumber == -1) {
-            const input = prompt('enter number of pendulums. more than 10 pendulums will impact animation smoothness on slower machines.')
+            const input = prompt('enter number of pendulums. more than 20 pendulums will impact animation smoothness on slower machines.')
             if (!setParameter('pendulumNumber', input)) return
         }
 
