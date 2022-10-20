@@ -100,10 +100,9 @@ function iterateFrame() {
 }
 
 function animate() {
-    let pendulumRadius
+    let pendulumRadius, t1
     const performanceDisplay = document.getElementById('renderTime')
     function update() {
-        let t1 = performance.now()
         if (halt) { halt = false; return }
         window.requestAnimationFrame(update)
         iterateFrame()
@@ -112,7 +111,7 @@ function animate() {
         pendulumRadius = l1 + l2
         const scalingFactor = 0.4 * canvasSize / pendulumRadius
         
-        for(let i = 0; i < pendulumCount; i++) { // TODO make all pendulums visable
+        for(let i = 0; i < pendulumCount; i++) {
             const simulationCoordinates = toCartesian(p1[i], p2[i], l1, l2)
             const c = simulationCoordinates.map(x => x * scalingFactor + canvasMidpoint)
             const workingContext = canvasContext[i]
@@ -124,7 +123,8 @@ function animate() {
             ball(workingContext, c[2], c[3], m2)
             trailDraw(c[2], c[3], workingContext.fillStyle)
         }
-        if (displayFrameRate) performanceDisplay.innerText = `frame: ${(performance.now() - t1).toFixed(5)}ms`
+        if (displayFrameRate) performanceDisplay.innerText = `frame: ${(performance.now() - t1).toFixed(4)}ms`
+        t1 = performance.now()
     }
     window.requestAnimationFrame(update)
 }
