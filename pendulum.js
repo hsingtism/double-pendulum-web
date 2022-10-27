@@ -34,6 +34,7 @@ const relativeCircleSize = 0.04
 const canvasSize = 1000
 const trailColorDecayOverlay = '#00000004' //black plus alpha. the more opaque the faster the trail decay
 
+const dragConstantThing = 0.00 // not used, set to 0
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
 let canvasMidpoint, circleConstant, trailCtx
 const pi = Math.PI; const tau = pi * 2
@@ -91,7 +92,7 @@ function createPendulum(_p1, _p2, _v1, _v2, _color) {
 function iterateFrame() {
     for(let m = 0; m < iterationPerFrame; m++) 
         for(let i = 0; i < pendulumCount; i++) {
-            const iterationReturn = iterate(iterationSubdivision, p1[i], p2[i], v1[i], v2[i], g, l1, l2)
+            const iterationReturn = iterate(iterationSubdivision, p1[i], p2[i], v1[i], v2[i], g, l1, l2, dragConstantThing)
             p1[i] = iterationReturn[0]
             p2[i] = iterationReturn[1]
             v1[i] = iterationReturn[2]
@@ -174,14 +175,21 @@ function clear(ctx) {
 const sin = Math.sin
 const cos = Math.cos
 
-function iterate(nInverse, p1_p, p2_p, p1_v, p2_v, g, l1, l2) {
+function accelFromDrag(velocity, csarea, halfDensityTimescoefficent, mass) {
+    const fdrag = halfDensityTimescoefficent * csarea * velocity * velocity * Math.sign(velocity) // simple formula for drag
+    return fdrag / mass // newton's second law
+}
+
+function iterate(nInverse, p1_p, p2_p, p1_v, p2_v, g, l1, l2, dragConstantThing) {
     // equations taken from https://www.myphysicslab.com/pendulum/double-pendulum-en.html
     const p1_a = (-g * (2 * m1 + m2) * sin(p1_p)
         - m2 * g * sin(p1_p - 2 * p2_p)
         - 2 * sin(p1_p - p2_p) * m2 * (p2_v * p2_v * l2 + p1_v * p1_v * l1 * cos(p1_p - p2_p)))
         / (l1 * (2 * m1 + m2 - m2 * cos(2 * p1_p - 2 * p2_p)))
+        - accelFromDrag(p1_v, m1 ** 3/2, dragConstantThing, m1)
     const p2_a = (2 * sin(p1_p - p2_p) * (p1_v * p1_v * l1 * (m1 + m2) + g * (m1 + m2) * cos(p1_p) + p2_v * p2_v * l2 * m2 * cos(p1_p - p2_p)))
         / (l2 * (2 * m1 + m2 - m2 * cos(2 * p1_p - 2 * p2_p)))
+        - accelFromDrag(p2_v, m2 ** 3/2, dragConstantThing, m2)
     p1_v += p1_a / nInverse
     p2_v += p2_a / nInverse
     p1_p += p1_v / nInverse
