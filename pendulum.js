@@ -9,21 +9,21 @@ try {
     parsedHash = {}
 }
 
-const pendulumNumber     = parsedHash.pendulumNumber || 3
+const pendulumNumber     = parsedHash.pendulumNumber ?? 3
 const iterationPerFrame  = parsedHash.iterationPerFrame || 1000 // iterationPerFrame/iterationSubdivision*60 = simulation times real time
-const startingAngle      = parsedHash.startingAngle || 2
-const startingAngleDelta = parsedHash.startingAngleDelta || 0.005
-const hslOffsetDeg       = parsedHash.hslOffsetDeg || 30
+const startingAngle      = parsedHash.startingAngle ?? 2
+const startingAngleDelta = parsedHash.startingAngleDelta ?? 0.005
+const hslOffsetDeg       = parsedHash.hslOffsetDeg ?? 30
 const displayFrameRate   = parsedHash.displayFrameRate ?? true
 
 // these environment variables can be changed mid-simulation
-let l1 = parsedHash.l1 || 1 //length to arm 
-let l2 = parsedHash.l2 || 1
-let m1 = parsedHash.m1 || 1 //mass of payload
-let m2 = parsedHash.m2 || 1
-const startingVelocity1  = parsedHash.startingVelocity1 || 0
-const startingVelocity2  = parsedHash.startingVelocity2 || 0
-let g = parsedHash.g || 1 //gravity
+let l1 = parsedHash.l1 ?? 1 //length to arm 
+let l2 = parsedHash.l2 ?? 1
+let m1 = parsedHash.m1 ?? 1 //mass of payload
+let m2 = parsedHash.m2 ?? 1
+const startingVelocity1  = parsedHash.startingVelocity1 ?? 0
+const startingVelocity2  = parsedHash.startingVelocity2 ?? 0
+let g = parsedHash.g ?? 1 //gravity
 
 /*--------------------------------*/
 // animations and stuff
@@ -34,9 +34,9 @@ const relativeCircleSize = 0.04
 const canvasSize = 1000
 const trailColorDecayOverlay = '#00000004' //black plus alpha. the more opaque the faster the trail decay
 
-const dragConstantThing = 0.00 // not used, set to 0
+const dragConstantThing = 0 // not used, set to 0
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
-let canvasMidpoint, circleConstant, trailCtx
+let canvasMidpoint, circleConstant, trailCtx, displayTrails
 const pi = Math.PI; const tau = pi * 2
 
 let pendulumCount = 0
@@ -48,8 +48,10 @@ let colors = []
 
 if (document.readyState === "complete" || document.readyState === "interactive") {
     init()
+    initializeUserInteractions()
 } else {
     document.addEventListener('DOMContentLoaded', init)
+    document.addEventListener('DOMContentLoaded', initializeUserInteractions)
 }
 
 let mainCanvas
@@ -68,6 +70,7 @@ async function init() {
     mainCanvas = document.getElementById('mainp').getContext('2d')
     trailCtx = document.getElementById('trails').getContext('2d')
     
+    displayTrails = true
     canvasMidpoint = 0.5 * canvasSize
     circleConstant = relativeCircleSize * canvasSize
 
@@ -154,6 +157,7 @@ function line(x1, y1, x2, y2) {
 }
 
 function trailDraw(x, y, color) {
+    if(!toggleTrails) return;
     trailCtx.fillStyle = color
     trailCtx.beginPath()
     trailCtx.arc(x, y, 1, 0, tau)
@@ -175,10 +179,10 @@ function clear(ctx) {
 const sin = Math.sin
 const cos = Math.cos
 
-function accelFromDrag(velocity, csarea, halfDensityTimescoefficent, mass) {
-    const fdrag = halfDensityTimescoefficent * csarea * velocity * velocity * Math.sign(velocity) // simple formula for drag
-    return fdrag / mass // newton's second law
-}
+// function accelFromDrag(velocity, csarea, halfDensityTimescoefficent, mass) {
+//     const fdrag = halfDensityTimescoefficent * csarea * velocity * velocity * Math.sign(velocity) 
+//     return fdrag / mass 
+// }
 
 function iterate(nInverse, p1_p, p2_p, p1_v, p2_v, g, l1, l2, dragConstantThing) {
     // equations taken from https://www.myphysicslab.com/pendulum/double-pendulum-en.html
@@ -186,10 +190,10 @@ function iterate(nInverse, p1_p, p2_p, p1_v, p2_v, g, l1, l2, dragConstantThing)
         - m2 * g * sin(p1_p - 2 * p2_p)
         - 2 * sin(p1_p - p2_p) * m2 * (p2_v * p2_v * l2 + p1_v * p1_v * l1 * cos(p1_p - p2_p)))
         / (l1 * (2 * m1 + m2 - m2 * cos(2 * p1_p - 2 * p2_p)))
-        - accelFromDrag(p1_v, m1 ** 3/2, dragConstantThing, m1)
+        // - accelFromDrag(p1_v, m1 ** 3/2, dragConstantThing, m1)
     const p2_a = (2 * sin(p1_p - p2_p) * (p1_v * p1_v * l1 * (m1 + m2) + g * (m1 + m2) * cos(p1_p) + p2_v * p2_v * l2 * m2 * cos(p1_p - p2_p)))
         / (l2 * (2 * m1 + m2 - m2 * cos(2 * p1_p - 2 * p2_p)))
-        - accelFromDrag(p2_v, m2 ** 3/2, dragConstantThing, m2)
+        // - accelFromDrag(p2_v, m2 ** 3/2, dragConstantThing, m2)
     p1_v += p1_a / nInverse
     p2_v += p2_a / nInverse
     p1_p += p1_v / nInverse
@@ -208,13 +212,6 @@ function toCartesian(p1_p, p2_p, l1, l2) {
 
 /*--------------------------------*/
 // user interactions
-// this section is to be seprated from the other scripts; only interact with DOM or using JSON in hash
-if (document.readyState === "complete" || document.readyState === "interactive") {
-    initializeUserInteractions()
-} else {
-    document.addEventListener('DOMContentLoaded', initializeUserInteractions)
-}
-
 function initializeUserInteractions() {
     const showHideOption = document.getElementById('showHideOptions')
     const parameterBox = document.getElementById('parameter')
@@ -281,4 +278,10 @@ function initializeUserInteractions() {
 
     document.getElementById('restartSimulation').addEventListener('click', parameterSubmit)
     document.getElementById('hardReset').addEventListener('click', hardResetReload)
+
+    // Start of auxiliary options
+    document.getElementById('toggleTrails').addEventListener('click', () => {
+        clear(trailCtx)
+        toggleTrails = !toggleTrails
+    })
 }
