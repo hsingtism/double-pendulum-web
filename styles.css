@@ -23,12 +23,35 @@ canvas {
     pointer-events: none;
 }
 
+table,th,td {
+    border: 1px solid #c0c0c0;
+    border-collapse: collapse;
+}
+
 #performanceDisplay {
     position: absolute;
     width: max-content;
     left: 100%;
     top: 0;
     transform: translate(-100%, 0);
+}
+
+#auxDisplay {
+    display: none;
+    position: absolute;
+    width: calc(100% - 20px);
+    left: 100%;
+    top: 100%;
+    transform: translate(-100%, -100%);
+    margin: 0;
+    padding: 5px;
+    color: #808080;
+    font-family: monospace;
+    font-size: 12px !important;
+}
+
+#auxDisplay>p, td {
+    color: #ffffff !important;
 }
 
 #performanceDisplay>p {
@@ -39,7 +62,7 @@ canvas {
     text-align: right;
 }
 
-#performanceDisplay>p>a {
+p>a {
     color: #a0a0a0;
 }
 

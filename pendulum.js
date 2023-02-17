@@ -36,7 +36,7 @@ const trailColorDecayOverlay = '#00000004' //black plus alpha. the more opaque t
 
 const dragConstantThing = 0 // not used, set to 0
 const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
-let canvasMidpoint, circleConstant, trailCtx, displayTrails
+let canvasMidpoint, circleConstant, trailCtx, displayTrails, flushExportStats
 const pi = Math.PI; const tau = pi * 2
 
 let pendulumCount = 0
@@ -79,6 +79,7 @@ async function init() {
     }
 
     animate()
+    initializeStatTable()
 }
 
 function createPendulum(_p1, _p2, _v1, _v2, _color) {
@@ -131,6 +132,7 @@ function animate() {
         }
 
         if (displayFrameRate) performanceDisplay.innerText = `frame: ${(performance.now() - t1).toFixed(4)}ms`
+        if(flushExportStats) displayStat()
         t1 = performance.now()
         frameCount++
     }
@@ -280,8 +282,97 @@ function initializeUserInteractions() {
     document.getElementById('hardReset').addEventListener('click', hardResetReload)
 
     // Start of auxiliary options
-    document.getElementById('toggleTrails').addEventListener('click', () => {
+    const toggleTrailsBtn = document.getElementById('toggleTrails')
+    toggleTrailsBtn.addEventListener('click', () => {
         clear(trailCtx)
+        toggleTrailsBtn.innerText = (toggleTrails ? 'show' : 'hide') + ' trails'
         toggleTrails = !toggleTrails
     })
+
+    const toggleStatBtn = document.getElementById('toggleNerd')
+    const statsDiv = document.getElementById('auxDisplay')
+    toggleStatBtn.addEventListener('click', () => {
+        statsDiv.style.display = flushExportStats ? 'none' : 'block'
+        flushExportStats = !flushExportStats
+    })
 }
+
+/*--------------------------------*/
+// data table
+const displayStatFormat = n => isNaN(n) ? 'null' : n.toFixed(18).substring(0, 18)
+const generateID = (pendulumID, referenceDiscriminant, dataField) => 'sf-' + pendulumID.toString(16) + referenceDiscriminant + dataField
+const dataFieldsCache = {fields: []}
+function initializeStatTable() {
+    const physDataTable = document.getElementById('dataTable')
+
+    const tempIDtable = ['sf-g', 'sf-iter', 'sf-fram', 'sf-l1', 'sf-m1', 'sf-l2', 'sf-m2']
+    dataFieldsCache.environmentSize = tempIDtable.length
+    
+    const dataFields = ['pendID', 'discrimant', 'theta', 'omega', 'alpha', 'Ug', 'KE', 'ME', 'DeltaE']
+    dataFieldsCache.dataFieldSize = dataFields.length
+    
+    const referenceDiscriminants = ['inner', 'outer', 'total']
+    dataFieldsCache.discrimiantSize = referenceDiscriminants.length
+    
+    let feedstring = '<tr><td>acceleration from gravity</td><td id="sf-g"></td><td>total iterations (per pendulum)</td><td id="sf-iter"></td><td>frames since start</td><td id="sf-fram"></td></tr><tr><td>inner arm length</td><td id="sf-l1"></td><td>inner bob mass</td><td id="sf-m1"></td></tr><tr><td>outer arm length</td><td id="sf-l2"></td><td>outer bob mass</td><td id="sf-m2"></td></tr><tr><td>pendulum ID</td><td></td><td>angular position</td><td>angular velocity</td><td>angular accel</td><td>gravitional potential energy</td><td>kinetic energy</td><td>&Sigma; mechanical energy</td><td>&Delta; simulated mechanical energy</td></tr>'
+    for(let i = 0; i < pendulumCount; i++) {
+        for(let j = 0; j < referenceDiscriminants.length; j++) {
+            feedstring += '<tr>'
+            for (let k = 0; k < dataFields.length; k++) {
+                const id = generateID(i, referenceDiscriminants[j], dataFields[k])
+                tempIDtable.push(id)
+                feedstring += `<td id="${id}">`
+            }
+            feedstring += '</tr>'
+        }
+    }
+    physDataTable.innerHTML += feedstring
+    // await sleep(0)
+
+    for(let i = 0; i < tempIDtable.length; i++) {
+        dataFieldsCache.fields.push(document.getElementById(tempIDtable[i]))
+    }
+}
+
+function displayStat() {
+    dataFieldsCache.fields[0].innerText = displayStatFormat(g)    
+    dataFieldsCache.fields[1].innerText = displayStatFormat(frameCount * iterationPerFrame)    
+    dataFieldsCache.fields[2].innerText = displayStatFormat(frameCount)    
+    dataFieldsCache.fields[3].innerText = displayStatFormat(l1)    
+    dataFieldsCache.fields[4].innerText = displayStatFormat(m1)    
+    dataFieldsCache.fields[5].innerText = displayStatFormat(l2)    
+    dataFieldsCache.fields[6].innerText = displayStatFormat(m2)
+    let workingI = dataFieldsCache.environmentSize
+    for(let i = 0; i < pendulumCount; i++) {
+        dataFieldsCache.fields[workingI + 0].innerText = displayStatFormat(i)
+        dataFieldsCache.fields[workingI + 1].innerText = 'inner'
+        dataFieldsCache.fields[workingI + 2].innerText = displayStatFormat(p1[i])
+        dataFieldsCache.fields[workingI + 3].innerText = displayStatFormat(v1[i])
+        dataFieldsCache.fields[workingI + 4].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 5].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 6].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 7].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 8].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 9].innerText = displayStatFormat(i)
+        dataFieldsCache.fields[workingI + 10].innerText = 'outer'
+        dataFieldsCache.fields[workingI + 11].innerText = displayStatFormat(p2[i])
+        dataFieldsCache.fields[workingI + 12].innerText = displayStatFormat(v2[i])
+        dataFieldsCache.fields[workingI + 13].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 14].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 15].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 16].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 17].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 18].innerText = displayStatFormat(i)
+        dataFieldsCache.fields[workingI + 19].innerText = 'total'
+        dataFieldsCache.fields[workingI + 20].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 21].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 22].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 23].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 24].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 25].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 26].innerText = displayStatFormat()
+
+        workingI += dataFieldsCache.dataFieldSize * dataFieldsCache.discrimiantSize
+    }
+}
+

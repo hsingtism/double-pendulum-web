@@ -15,12 +15,30 @@
 <body>
     <div id="performanceDisplay">
         <p>made by <a href="https://hsing.org">Hsing Lo</a>
-        <br>equations from <a href="https://www.myphysicslab.com/pendulum/double-pendulum-en.html">myPhysicsLab</a></p>
+            <br>equations from <a href="https://www.myphysicslab.com/pendulum/double-pendulum-en.html">myPhysicsLab</a>
+        </p>
         <p id="renderTime"></p>
     </div>
+    <div id="auxDisplay">
+        <p>This is a double pendulum simulator built by Hsing Lo heavily adapting differential equations from
+            myPhysicsLab. A double pendulum, mathmatically a four-dimentional system, is a chaotic system that is often
+            used as a demonstration for chaos because of its mesmerizing path and intuitiveness as a physical
+            contraption. This simulation simulates one or more double pendulums showing its chaotic patterns and
+            divergent tendency. This simulation uses Euler's method to estimate differential equations, iterating the
+            equations (at a default of) 1000 times per frame, or around 60000 times per second. A pendulum's state is projected to
+            two dimensions while assuming no friction, perfectly rigid and massless joints, point masses, perfectly and
+            uniform gravity, all under classical mechanics; an simple implemention for drag is included but
+            not accessable to the user.
+            <br><br>Below are some physics data in case you are interested. With the exception of
+            energy, they are all internally used. Units are up to the viewer's discretion as long as they are coherent.
+            Data updated every frame.
+        <table id="dataTable"></table>
+        </p>
+    </div>
     <div>
+        <button id="toggleNerd">colophon + physics data</button><br>
         <button id="showHideOptions">show options</button>
-        <button id="toggleTrails">toggle trails</button>
+        <button id="toggleTrails">hide trails</button>
     </div>
     <div id="parameter">
         <h1>Double Pendulum Simulator</h1>
@@ -48,7 +66,8 @@
             <br><small>In radians; counterclockwise; 0 is hanging. Default: 2</small></label>
         <br><input type="number" id="startingAngle">
 
-        <br><label for="startingAngleDelta">Difference in starting angle<br><small>Radians. Default: 0.005</small></label>
+        <br><label for="startingAngleDelta">Difference in starting angle<br><small>Radians. Default:
+                0.005</small></label>
         <br><input type="number" id="startingAngleDelta">
 
         <br><label for="hslOffsetDeg">Hue offset<br><small>HSL degrees, 0-180. Default: 30</small></label>
@@ -61,16 +80,17 @@
         </select>
 
         <h2>Environment (click to set)</h2>
-        
+
         <span id="l1">Arm 1 length;</span> <span id="l2">Arm 2 length;</span>
         <br><span id="m1">Mass 1 mass;</span> <span id="m2">Mass 2 mass;</span>
         <br><span id="v1">Mass 1 starting velocity;</span> <span id="v2">Mass 2 starting velocity;</span>
         <br><span id="g">Gravity;</span>
         <br>
-        
+
         <br><button id="restartSimulation">use specified parameters</button>
         <br><button id="hardReset">revert to default parameters</button>
     </div>
     <div id="containCanvas"></div>
 </body>
+
 </html>
