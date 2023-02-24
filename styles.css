@@ -48,6 +48,7 @@ table,th,td {
     color: #808080;
     font-family: monospace;
     font-size: 12px !important;
+    z-index: -9;
 }
 
 #auxDisplay>p, td {

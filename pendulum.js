@@ -91,6 +91,9 @@ function createPendulum(_p1, _p2, _v1, _v2, _color) {
     mainCanvas.globalAlpha = 0.75
     mainCanvas.lineWidth = lineWidth
     pendulumCount++
+    initialEnergy.push(gravitionalPotentialEnergy(m1, toCartesian(_p1, _p2, l1, l2)[1], m2, toCartesian(_p1, _p2, l1, l2)[3], g)
+        + kineticEnergy(m1, _p1, l1, _v1, m2, _p2, l2, _v2)
+    )
 }
 
 function iterateFrame() {
@@ -129,6 +132,8 @@ function animate() {
             line(c[0], c[1], c[2], c[3])
             ball(c[2], c[3], m2)
             trailDraw(c[2], c[3], mainCanvas.fillStyle)
+            
+            if(flushExportStats) centerOfMassP[i] = [simulationCoordinates[0] * m1 * 0.5 + simulationCoordinates[2] * m2 * 0.5, simulationCoordinates[1] * m1 * 0.5 + simulationCoordinates[3] * m2 * 0.5]
         }
 
         if (displayFrameRate) performanceDisplay.innerText = `frame: ${(performance.now() - t1).toFixed(4)}ms`
@@ -210,6 +215,20 @@ function toCartesian(p1_p, p2_p, l1, l2) {
     const p2_x = p1_x + l2 * sin(p2_p)
     const p2_y = p1_y + l2 * cos(p2_p)
     return [p1_x, p1_y, p2_x, p2_y]
+}
+
+// auxiliary physics functions
+function kineticEnergy(m1, p1, l1, v1, m2, p2, l2, v2) {
+    // https://scienceworld.wolfram.com/physics/DoublePendulum.html
+    return 0.5 * m1 * l1 * l1 * v1 * v1 
+        + 0.5 * m2 * (l1 * l1 * v1 * v1 + l2 * l2 * v2 * v2 + 2 * l1 * l2 * v1 * v2 * cos(p1 - p2))
+}
+
+function gravitionalPotentialEnergy(m1, x1, m2, x2, g) {
+    // stright forward Ug = mgh
+    const _1 = m1 * x1
+    const _2 = m2 * x2 
+    return (_1 + _2) * -g 
 }
 
 /*--------------------------------*/
@@ -299,7 +318,7 @@ function initializeUserInteractions() {
 
 /*--------------------------------*/
 // data table
-const displayStatFormat = n => isNaN(n) ? 'null' : n.toFixed(18).substring(0, 18)
+const displayStatFormat = n => isNaN(n) ? '****' : n.toFixed(18).substring(0, 18)
 const generateID = (pendulumID, referenceDiscriminant, dataField) => 'sf-' + pendulumID.toString(16) + referenceDiscriminant + dataField
 const dataFieldsCache = {fields: []}
 function initializeStatTable() {
@@ -308,13 +327,13 @@ function initializeStatTable() {
     const tempIDtable = ['sf-g', 'sf-iter', 'sf-fram', 'sf-l1', 'sf-m1', 'sf-l2', 'sf-m2']
     dataFieldsCache.environmentSize = tempIDtable.length
     
-    const dataFields = ['pendID', 'discrimant', 'theta', 'omega', 'alpha', 'Ug', 'KE', 'ME', 'DeltaE']
+    const dataFields = ['pendID', 'discrimant', 'theta', 'omega', 'Ug', 'KE', 'ME', 'DeltaE']
     dataFieldsCache.dataFieldSize = dataFields.length
     
     const referenceDiscriminants = ['inner', 'outer', 'total']
     dataFieldsCache.discrimiantSize = referenceDiscriminants.length
     
-    let feedstring = '<tr><td>acceleration from gravity</td><td id="sf-g"></td><td>total iterations (per pendulum)</td><td id="sf-iter"></td><td>frames since start</td><td id="sf-fram"></td></tr><tr><td>inner arm length</td><td id="sf-l1"></td><td>inner bob mass</td><td id="sf-m1"></td></tr><tr><td>outer arm length</td><td id="sf-l2"></td><td>outer bob mass</td><td id="sf-m2"></td></tr><tr><td>pendulum ID</td><td></td><td>angular position</td><td>angular velocity</td><td>angular accel</td><td>gravitional potential energy</td><td>kinetic energy</td><td>&Sigma; mechanical energy</td><td>&Delta; simulated mechanical energy</td></tr>'
+    let feedstring = '<tr><td>acceleration from gravity</td><td id="sf-g"></td><td>total iterations (per pendulum)</td><td id="sf-iter"></td><td>frames since start</td><td id="sf-fram"></td></tr><tr><td>inner arm length</td><td id="sf-l1"></td><td>inner bob mass</td><td id="sf-m1"></td></tr><tr><td>outer arm length</td><td id="sf-l2"></td><td>outer bob mass</td><td id="sf-m2"></td></tr><tr><td>pendulum ID</td><td></td><td>angular position</td><td>angular velocity</td><td>gravitional <br>potential energy</td><td>kinetic energy</td><td>&Sigma; mechanical energy</td><td>energy created or destroyed <br>(actual energy / expected energy)</td></tr>'
     for(let i = 0; i < pendulumCount; i++) {
         for(let j = 0; j < referenceDiscriminants.length; j++) {
             feedstring += '<tr>'
@@ -334,6 +353,8 @@ function initializeStatTable() {
     }
 }
 
+const centerOfMassP = []
+const initialEnergy = []
 function displayStat() {
     dataFieldsCache.fields[0].innerText = displayStatFormat(g)    
     dataFieldsCache.fields[1].innerText = displayStatFormat(frameCount * iterationPerFrame)    
@@ -345,34 +366,36 @@ function displayStat() {
     let workingI = dataFieldsCache.environmentSize
     for(let i = 0; i < pendulumCount; i++) {
         dataFieldsCache.fields[workingI + 0].innerText = displayStatFormat(i)
-        dataFieldsCache.fields[workingI + 1].innerText = 'inner'
+        dataFieldsCache.fields[workingI + 1].innerText = 'inner bob'
         dataFieldsCache.fields[workingI + 2].innerText = displayStatFormat(p1[i])
         dataFieldsCache.fields[workingI + 3].innerText = displayStatFormat(v1[i])
         dataFieldsCache.fields[workingI + 4].innerText = displayStatFormat()
         dataFieldsCache.fields[workingI + 5].innerText = displayStatFormat()
         dataFieldsCache.fields[workingI + 6].innerText = displayStatFormat()
         dataFieldsCache.fields[workingI + 7].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 8].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 9].innerText = displayStatFormat(i)
-        dataFieldsCache.fields[workingI + 10].innerText = 'outer'
-        dataFieldsCache.fields[workingI + 11].innerText = displayStatFormat(p2[i])
-        dataFieldsCache.fields[workingI + 12].innerText = displayStatFormat(v2[i])
+        dataFieldsCache.fields[workingI + 8].innerText = displayStatFormat(i)
+        dataFieldsCache.fields[workingI + 9].innerText = 'outer bob'
+        dataFieldsCache.fields[workingI + 10].innerText = displayStatFormat(p2[i])
+        dataFieldsCache.fields[workingI + 11].innerText = displayStatFormat(v2[i])
+        dataFieldsCache.fields[workingI + 12].innerText = displayStatFormat()
         dataFieldsCache.fields[workingI + 13].innerText = displayStatFormat()
         dataFieldsCache.fields[workingI + 14].innerText = displayStatFormat()
         dataFieldsCache.fields[workingI + 15].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 16].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 17].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 18].innerText = displayStatFormat(i)
-        dataFieldsCache.fields[workingI + 19].innerText = 'total'
-        dataFieldsCache.fields[workingI + 20].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 21].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 22].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 23].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 24].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 25].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 26].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 16].innerText = displayStatFormat(i)
+        dataFieldsCache.fields[workingI + 17].innerText = 'center of mass'
+        dataFieldsCache.fields[workingI + 18].innerText = displayStatFormat()
+        dataFieldsCache.fields[workingI + 19].innerText = displayStatFormat()
+
+        const Ug = gravitionalPotentialEnergy(m1 + m2, centerOfMassP[i][1], 0, 0, g)
+        const KE = kineticEnergy(m1, p1[i], l1, v1[i], m2, p2[i], l2, v2[i])
+
+        dataFieldsCache.fields[workingI + 20].innerText = displayStatFormat(Ug)
+        dataFieldsCache.fields[workingI + 21].innerText = displayStatFormat(KE)
+        dataFieldsCache.fields[workingI + 22].innerText = displayStatFormat(Ug + KE)
+        dataFieldsCache.fields[workingI + 23].innerText = displayStatFormat((Ug + KE) / initialEnergy[i])
 
         workingI += dataFieldsCache.dataFieldSize * dataFieldsCache.discrimiantSize
     }
+
 }
 
