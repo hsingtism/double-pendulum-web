@@ -355,44 +355,35 @@ function initializeStatTable() {
 
 const centerOfMassP = []
 const initialEnergy = []
+function dataFieldWrite(fieldIndex, content, bypassFormatting) {
+    dataFieldsCache.fields[fieldIndex].innerText = bypassFormatting ? content : displayStatFormat(content)
+}
+
 function displayStat() {
-    dataFieldsCache.fields[0].innerText = displayStatFormat(g)    
-    dataFieldsCache.fields[1].innerText = displayStatFormat(frameCount * iterationPerFrame)    
-    dataFieldsCache.fields[2].innerText = displayStatFormat(frameCount)    
-    dataFieldsCache.fields[3].innerText = displayStatFormat(l1)    
-    dataFieldsCache.fields[4].innerText = displayStatFormat(m1)    
-    dataFieldsCache.fields[5].innerText = displayStatFormat(l2)    
-    dataFieldsCache.fields[6].innerText = displayStatFormat(m2)
+    dataFieldWrite(0, g)    
+    dataFieldWrite(1, frameCount * iterationPerFrame)    
+    dataFieldWrite(2, frameCount)    
+    dataFieldWrite(3, l1)    
+    dataFieldWrite(4, m1)    
+    dataFieldWrite(5, l2)    
+    dataFieldWrite(6, m2)
     let workingI = dataFieldsCache.environmentSize
     for(let i = 0; i < pendulumCount; i++) {
-        dataFieldsCache.fields[workingI + 0].innerText = displayStatFormat(i)
-        dataFieldsCache.fields[workingI + 1].innerText = 'inner bob'
-        dataFieldsCache.fields[workingI + 2].innerText = displayStatFormat(p1[i])
-        dataFieldsCache.fields[workingI + 3].innerText = displayStatFormat(v1[i])
-        dataFieldsCache.fields[workingI + 4].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 5].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 6].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 7].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 8].innerText = displayStatFormat(i)
-        dataFieldsCache.fields[workingI + 9].innerText = 'outer bob'
-        dataFieldsCache.fields[workingI + 10].innerText = displayStatFormat(p2[i])
-        dataFieldsCache.fields[workingI + 11].innerText = displayStatFormat(v2[i])
-        dataFieldsCache.fields[workingI + 12].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 13].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 14].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 15].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 16].innerText = displayStatFormat(i)
-        dataFieldsCache.fields[workingI + 17].innerText = 'center of mass'
-        dataFieldsCache.fields[workingI + 18].innerText = displayStatFormat()
-        dataFieldsCache.fields[workingI + 19].innerText = displayStatFormat()
-
         const Ug = gravitionalPotentialEnergy(m1 + m2, centerOfMassP[i][1], 0, 0, g)
         const KE = kineticEnergy(m1, p1[i], l1, v1[i], m2, p2[i], l2, v2[i])
 
-        dataFieldsCache.fields[workingI + 20].innerText = displayStatFormat(Ug)
-        dataFieldsCache.fields[workingI + 21].innerText = displayStatFormat(KE)
-        dataFieldsCache.fields[workingI + 22].innerText = displayStatFormat(Ug + KE)
-        dataFieldsCache.fields[workingI + 23].innerText = displayStatFormat((Ug + KE) / initialEnergy[i])
+        dataFieldWrite(workingI + 0, i, true)
+        dataFieldWrite(workingI + 1, 'inner bob', true)
+        dataFieldWrite(workingI + 2, p1[i])
+        dataFieldWrite(workingI + 3, v1[i])
+        dataFieldWrite(workingI + 9, 'outer bob', true)
+        dataFieldWrite(workingI + 10, p2[i])
+        dataFieldWrite(workingI + 11, v2[i])
+        dataFieldWrite(workingI + 17, 'center of mass', true)
+        dataFieldWrite(workingI + 20, Ug)
+        dataFieldWrite(workingI + 21, KE)
+        dataFieldWrite(workingI + 22, Ug + KE)
+        dataFieldWrite(workingI + 23, (Ug + KE) / initialEnergy[i])
 
         workingI += dataFieldsCache.dataFieldSize * dataFieldsCache.discrimiantSize
     }
