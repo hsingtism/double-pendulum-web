@@ -333,7 +333,7 @@ function initializeStatTable() {
     const referenceDiscriminants = ['inner', 'outer', 'total']
     dataFieldsCache.discrimiantSize = referenceDiscriminants.length
     
-    let feedstring = '<tr><td>acceleration from gravity</td><td id="sf-g"></td><td>total iterations (per pendulum)</td><td id="sf-iter"></td><td>frames since start</td><td id="sf-fram"></td></tr><tr><td>inner arm length</td><td id="sf-l1"></td><td>inner bob mass</td><td id="sf-m1"></td></tr><tr><td>outer arm length</td><td id="sf-l2"></td><td>outer bob mass</td><td id="sf-m2"></td></tr><tr><td>pendulum ID</td><td></td><td>angular position</td><td>angular velocity</td><td>gravitional <br>potential energy</td><td>kinetic energy</td><td>&Sigma; mechanical energy</td><td>energy created or destroyed <br>(actual energy / expected energy)</td></tr>'
+    let feedstring = '<tr><td>acceleration from gravity</td><td id="sf-g"></td><td>total iterations (per pendulum)</td><td id="sf-iter"></td><td>frames since start</td><td id="sf-fram"></td></tr><tr><td>inner arm length</td><td id="sf-l1"></td><td>inner bob mass</td><td id="sf-m1"></td></tr><tr><td>outer arm length</td><td id="sf-l2"></td><td>outer bob mass</td><td id="sf-m2"></td></tr><tr><td>pendulum ID</td><td></td><td>angular position</td><td>angular velocity</td><td>gravitional <br>potential energy</td><td>kinetic energy</td><td>&Sigma; mechanical energy</td><td>energy created or destroyed <br>(actual energy / expected energy)&dagger;</td></tr>'
     for(let i = 0; i < pendulumCount; i++) {
         for(let j = 0; j < referenceDiscriminants.length; j++) {
             feedstring += '<tr>'
@@ -371,6 +371,7 @@ function displayStat() {
     for(let i = 0; i < pendulumCount; i++) {
         const Ug = gravitionalPotentialEnergy(m1 + m2, centerOfMassP[i][1], 0, 0, g)
         const KE = kineticEnergy(m1, p1[i], l1, v1[i], m2, p2[i], l2, v2[i])
+        const UgCorrection = centerOfMassP[i][1] * (m1 + m2) * -g
 
         dataFieldWrite(workingI + 0, i, true)
         dataFieldWrite(workingI + 1, 'inner bob', true)
@@ -383,7 +384,7 @@ function displayStat() {
         dataFieldWrite(workingI + 20, Ug)
         dataFieldWrite(workingI + 21, KE)
         dataFieldWrite(workingI + 22, Ug + KE)
-        dataFieldWrite(workingI + 23, (Ug + KE) / initialEnergy[i])
+        dataFieldWrite(workingI + 23, (Ug + KE - UgCorrection) / (initialEnergy[i] - UgCorrection))
 
         workingI += dataFieldsCache.dataFieldSize * dataFieldsCache.discrimiantSize
     }
