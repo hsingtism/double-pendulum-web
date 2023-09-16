@@ -10,6 +10,17 @@
     <meta name="keywords" content="double pendulum, chaos theory, simulation, pendulum">
     <link rel="stylesheet" href="styles.css">
     <script async src="pendulum.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QMK85V7F4W"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-QMK85V7F4W');
+    </script>
 </head>
 
 <body>
@@ -18,6 +29,7 @@
             <br>equations from <a href="https://www.myphysicslab.com/pendulum/double-pendulum-en.html">myPhysicsLab</a>
         </p>
         <p id="renderTime"></p>
+        <p id="simulationSpeedDisplay"></p>
     </div>
     <div id="auxDisplay">
         <p>This is a double pendulum simulator built by Hsing Lo heavily adapting differential equations from
@@ -25,30 +37,46 @@
             used as a demonstration for chaos because of its mesmerizing path and intuitiveness as a physical
             contraption. This simulation simulates one or more double pendulums showing its chaotic patterns and
             divergent tendency. This simulation uses Euler's method to estimate differential equations, iterating the
-            equations (at a default of) 1000 times per frame, or around 60000 times per second. A pendulum's state is projected to
+            equations (at a default of) 1024 times per frame, or around 60000 times per second. A pendulum's state is
+            projected to
             two dimensions while assuming no friction, perfectly rigid and massless joints, point masses, perfectly and
             uniform gravity, all under classical mechanics; an simple implemention for drag is included but
             not accessable to the user.
             <br><br>Below are some physics data in case you are interested. With the exception of
             energy, they are all internally used. Units are up to the viewer's discretion as long as they are coherent.
             Data updated every frame.
-            <table id="dataTable"></table>
-            The unit is any coherent unit. Radian is implied for angles, the direction is counterclockwise; 0 is hanging.
-            Positive values for g (acceleration due to gravity) describes downwards acceleration. The reference line for
-            gravitional potential energy is the center of all pendulums (pivot of the inner bob). The translational 
-            reference for kinetic energy is the center of all pendulums and the rotational reference is the canvas.
-            <br>&dagger;This ratio of energy has 0 set as a stationary hanging pendulum; the gravitional potential energy
-            used to calculate it is different from what is displayed with its 0 set to the minimum possible.
+        <table id="dataTable"></table>
+        The unit is any coherent unit. Radian is implied for angles, the direction is counterclockwise; 0 is hanging.
+        Positive values for g (acceleration due to gravity) describes downwards acceleration. The reference line for
+        gravitional potential energy is the center of all pendulums (pivot of the inner bob). The translational
+        reference for kinetic energy is the center of all pendulums and the rotational reference is the canvas.
+        <br>&dagger;This ratio of energy has 0 set as a stationary hanging pendulum; the gravitional potential energy
+        used to calculate it is different from what is displayed with its 0 set to the minimum possible.
         </p>
     </div>
     <div>
-        <button id="toggleNerd">colophon + physics data</button><br>
+        <button id="doubleSpeed">speed up (2x)</button>
+        <button id="halfSpeed">slow down (0.5x)</button>
+
+        <br>
+
+        <button id="toggleNerd">colophon + physics data</button>
+
+        <br>
+        
         <button id="showHideOptions">show options</button>
         <button id="toggleTrails">hide trails</button>
     </div>
     <div id="parameter">
         <h1>Double Pendulum Simulator</h1>
-        <h2>Select starting parameters</h2>
+        <h2>Preset starting parameter</h2>
+        <button id="hardReset">default parameters</button>
+        <button id="preset1">"256 pendulums in slow motion"</button>
+        <button id="preset2">"failed balance"</button>
+        <button id="preset3">"falling circle"</button>
+        <button id="preset4">"low energy"</button>
+
+        <h2>Set custom starting parameters (default values used when fields blank)</h2>
 
         <label for="pendulumNumber">Number of pendulums</label>
         <br><select name="Number of pendulums" id="pendulumNumber">
@@ -64,12 +92,16 @@
             <option value="-1">Custom (set when submitting parameters)</option>
         </select>
 
+        <br><label for="iterationPerFrame">Simulation speed
+            <br><small>How the fast the simulation is <i>displayed</i>. Values are multiples of frames/(20 second). Default: 1.</small></label>
+        <br><input type="number" id="simulationSpeed">
+
         <br><label for="iterationPerFrame">Iteration per frame
-            <br><small>The higher the number, the less error the simulation picks up. Recommended: 1000.</small></label>
+            <br><small>The higher the number, the less error the simulation picks up. Default: 1024.</small></label>
         <br><input type="number" id="iterationPerFrame">
 
         <br><label for="startingAngle">Starting angle
-            <br><small>In radians; counterclockwise; 0 is hanging. Default: 2</small></label>
+            <br><small>Radians; counterclockwise; 0 is hanging. Default: random</small></label>
         <br><input type="number" id="startingAngle">
 
         <br><label for="startingAngleDelta">Difference in starting angle<br><small>Radians. Default:
@@ -81,7 +113,8 @@
 
         <br><label for="displayFrameRate">Display frame rate</label>
         <br><select name="Frame rate toggle" id="displayFrameRate">
-            <option value="1" selected>True</option>
+            <option value="">-</option>
+            <option value="1">True</option>
             <option value="0">False</option>
         </select>
 
@@ -89,12 +122,10 @@
 
         <span id="l1">Arm 1 length;</span> <span id="l2">Arm 2 length;</span>
         <br><span id="m1">Mass 1 mass;</span> <span id="m2">Mass 2 mass;</span>
-        <br><span id="v1">Mass 1 starting velocity;</span> <span id="v2">Mass 2 starting velocity;</span>
         <br><span id="g">Gravity;</span>
         <br>
 
         <br><button id="restartSimulation">use specified parameters</button>
-        <br><button id="hardReset">revert to default parameters</button>
     </div>
     <div id="containCanvas"></div>
 </body>

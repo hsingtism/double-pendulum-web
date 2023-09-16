@@ -1,3 +1,4 @@
+const pi = Math.PI; const tau = pi * 2
 /*--------------------------------*/
 // get starting parameters
 let parsedHash
@@ -10,8 +11,8 @@ try {
 }
 
 const pendulumNumber     = parsedHash.pendulumNumber ?? 3
-const iterationPerFrame  = parsedHash.iterationPerFrame || 1000 // iterationPerFrame/iterationSubdivision*60 = simulation times real time
-const startingAngle      = parsedHash.startingAngle ?? 2
+let iterationPerFrame  = parsedHash.iterationPerFrame || 1024 // iterationPerFrame/iterationSubdivision*60 = simulation times real time
+const startingAngle      = parsedHash.startingAngle ?? pi/2 + (Date.now() % 60000 + Math.random()) / 60000 * 0.2 * pi
 const startingAngleDelta = parsedHash.startingAngleDelta ?? 0.005
 const hslOffsetDeg       = parsedHash.hslOffsetDeg ?? 30
 const displayFrameRate   = parsedHash.displayFrameRate ?? true
@@ -35,9 +36,18 @@ const canvasSize = 1000
 const trailColorDecayOverlay = '#00000004' //black plus alpha. the more opaque the faster the trail decay
 
 const dragConstantThing = 0 // not used, set to 0
-const iterationSubdivision = iterationPerFrame * simulationSpeedInverse
-let canvasMidpoint, circleConstant, trailCtx, displayTrails, flushExportStats
-const pi = Math.PI; const tau = pi * 2
+let canvasMidpoint, circleConstant, trailCtx, displayTrails, flushExportStats 
+let toggleTrails = true
+
+const iterationSubdivision = iterationPerFrame * simulationSpeedInverse //after this is set, iterationPerFrame can change simulation speed
+iterationPerFrame *= parsedHash.simulationSpeed || 1
+function halfSpeed() {
+    iterationPerFrame = Math.floor(iterationPerFrame / 2)
+}
+function doubleSpeed() {
+    iterationPerFrame *= 2
+    if (iterationPerFrame === 0) iterationPerFrame++
+}
 
 let pendulumCount = 0
 let p1 = []
@@ -96,8 +106,9 @@ function createPendulum(_p1, _p2, _v1, _v2, _color) {
     )
 }
 
+let totalIterations = 0
 function iterateFrame() {
-    for(let m = 0; m < iterationPerFrame; m++) 
+    for(let m = 0; m < iterationPerFrame; m++) {
         for(let i = 0; i < pendulumCount; i++) {
             const iterationReturn = iterate(iterationSubdivision, p1[i], p2[i], v1[i], v2[i], g, l1, l2, dragConstantThing)
             p1[i] = iterationReturn[0]
@@ -105,12 +116,16 @@ function iterateFrame() {
             v1[i] = iterationReturn[2]
             v2[i] = iterationReturn[3]
         }
+        totalIterations++
+    }
 }
 
 let frameCount = 0 // for debug
+let lastFrameTime = NaN
 function animate() {
     let pendulumRadius, t1
     const performanceDisplay = document.getElementById('renderTime')
+    const iterationSpeedDisplay = document.getElementById('simulationSpeedDisplay')
     function update() {
         if (halt) { halt = false; return }
         window.requestAnimationFrame(update)
@@ -136,7 +151,9 @@ function animate() {
             if(flushExportStats) centerOfMassP[i] = [simulationCoordinates[0] * m1 * 0.5 + simulationCoordinates[2] * m2 * 0.5, simulationCoordinates[1] * m1 * 0.5 + simulationCoordinates[3] * m2 * 0.5]
         }
 
-        if (displayFrameRate) performanceDisplay.innerText = `frame: ${(performance.now() - t1).toFixed(4)}ms`
+        lastFrameTime = performance.now() - t1
+        if (displayFrameRate) performanceDisplay.innerText = `frame: ${lastFrameTime.toFixed(4)}ms`
+        if (displayFrameRate) iterationSpeedDisplay.innerText = `speed: ${(iterationPerFrame/iterationSubdivision*simulationSpeedInverse*100).toFixed(4)}%`
         if(flushExportStats) displayStat()
         t1 = performance.now()
         frameCount++
@@ -261,7 +278,7 @@ function initializeUserInteractions() {
         return true
     }
 
-    const ELToAttach = ['l1', 'l2', 'm1', 'm2', 'v1', 'v2', 'g']
+    const ELToAttach = ['l1', 'l2', 'm1', 'm2', 'g']
     for (let i = 0; i < ELToAttach.length; i++) {
         document.getElementById(ELToAttach[i]).addEventListener('click', () => {
             const key = ELToAttach[i]
@@ -272,6 +289,7 @@ function initializeUserInteractions() {
 
     function parameterSubmit() {
         const valuesToGet = [
+            'simulationSpeed',
             'pendulumNumber',
             'iterationPerFrame',
             'startingAngle',
@@ -288,17 +306,20 @@ function initializeUserInteractions() {
             if (!setParameter('pendulumNumber', input)) return
         }
 
-        window.location.hash = encodeURIComponent(JSON.stringify(userOptions))
-        window.location.reload()
+        setHashReload(encodeURIComponent(JSON.stringify(userOptions)))
     }
 
-    function hardResetReload() {
-        window.location.hash = ''
+    function setHashReload(str) {
+        window.location.hash = str
         window.location.reload()
     }
 
     document.getElementById('restartSimulation').addEventListener('click', parameterSubmit)
-    document.getElementById('hardReset').addEventListener('click', hardResetReload)
+    document.getElementById('preset1').addEventListener('click', () => setHashReload('%7B"simulationSpeed"%3A0.125%2C"pendulumNumber"%3A256%2C"startingAngleDelta"%3A0.0005%7D'))
+    document.getElementById('preset2').addEventListener('click', () => setHashReload('%7B"simulationSpeed"%3A0.5%2C"pendulumNumber"%3A64%2C"startingAngle"%3A3.1415926%2C"startingAngleDelta"%3A1e-7%7D'))
+    document.getElementById('preset3').addEventListener('click', () => setHashReload('%7B"simulationSpeed"%3A0.125%2C"pendulumNumber"%3A128%2C"startingAngleDelta"%3A0.0490873852%7D'))
+    document.getElementById('preset4').addEventListener('click', () => setHashReload('%7B"pendulumNumber"%3A32%2C"startingAngle"%3A0.5%2C"hslOffsetDeg"%3A220%7D'))
+
 
     // Start of auxiliary options
     const toggleTrailsBtn = document.getElementById('toggleTrails')
@@ -314,6 +335,9 @@ function initializeUserInteractions() {
         statsDiv.style.display = flushExportStats ? 'none' : 'block'
         flushExportStats = !flushExportStats
     })
+
+    document.getElementById('halfSpeed').addEventListener('click', halfSpeed)
+    document.getElementById('doubleSpeed').addEventListener('click', doubleSpeed)
 }
 
 /*--------------------------------*/
@@ -324,7 +348,7 @@ const dataFieldsCache = {fields: []}
 function initializeStatTable() {
     const physDataTable = document.getElementById('dataTable')
 
-    const tempIDtable = ['sf-g', 'sf-iter', 'sf-fram', 'sf-l1', 'sf-m1', 'sf-l2', 'sf-m2']
+    const tempIDtable = ['sf-g', 'sf-iter', 'sf-fram', 'sf-l1', 'sf-m1', 'sf-l2', 'sf-m2', null, 'sf-delta-t', 'sf-inv-delta-t']
     dataFieldsCache.environmentSize = tempIDtable.length
     
     const dataFields = ['pendID', 'discrimant', 'theta', 'omega', 'Ug', 'KE', 'ME', 'DeltaE']
@@ -333,7 +357,7 @@ function initializeStatTable() {
     const referenceDiscriminants = ['inner', 'outer', 'total']
     dataFieldsCache.discrimiantSize = referenceDiscriminants.length
     
-    let feedstring = '<tr><td>acceleration from gravity</td><td id="sf-g"></td><td>total iterations (per pendulum)</td><td id="sf-iter"></td><td>frames since start</td><td id="sf-fram"></td></tr><tr><td>inner arm length</td><td id="sf-l1"></td><td>inner bob mass</td><td id="sf-m1"></td></tr><tr><td>outer arm length</td><td id="sf-l2"></td><td>outer bob mass</td><td id="sf-m2"></td></tr><tr><td>pendulum ID</td><td></td><td>angular position</td><td>angular velocity</td><td>gravitional <br>potential energy</td><td>kinetic energy</td><td>&Sigma; mechanical energy</td><td>energy created or destroyed <br>(actual energy / expected energy)&dagger;</td></tr>'
+    let feedstring = '<tr><td>acceleration from gravity</td><td id="sf-g"></td><td>total iterations (per pendulum)</td><td id="sf-iter"></td><td>frames since start</td><td id="sf-fram"></td></tr><tr><td>inner arm length</td><td id="sf-l1"></td><td>inner bob mass</td><td></td><td></td><td id="sf-m1"></td><td>last frame time (ms)</td><td id="sf-delta-t"></td></tr><tr><td>outer arm length</td><td id="sf-l2"></td><td>outer bob mass</td><td id="sf-m2"></td><td></td><td></td><td>frame time per second</td><td id="sf-inv-delta-t"></td></tr><tr><td>pendulum ID</td><td></td><td>angular position</td><td>angular velocity</td><td>gravitional <br>potential energy</td><td>kinetic energy</td><td>&Sigma; mechanical energy</td><td>energy created or destroyed <br>(actual energy / expected energy)&dagger;</td></tr>'
     for(let i = 0; i < pendulumCount; i++) {
         for(let j = 0; j < referenceDiscriminants.length; j++) {
             feedstring += '<tr>'
@@ -361,12 +385,14 @@ function dataFieldWrite(fieldIndex, content, bypassFormatting) {
 
 function displayStat() {
     dataFieldWrite(0, g)    
-    dataFieldWrite(1, frameCount * iterationPerFrame)    
+    dataFieldWrite(1, totalIterations)    
     dataFieldWrite(2, frameCount)    
     dataFieldWrite(3, l1)    
     dataFieldWrite(4, m1)    
     dataFieldWrite(5, l2)    
     dataFieldWrite(6, m2)
+    dataFieldWrite(8, lastFrameTime)
+    dataFieldWrite(9, 1000 / lastFrameTime)
     let workingI = dataFieldsCache.environmentSize
     for(let i = 0; i < pendulumCount; i++) {
         const Ug = gravitionalPotentialEnergy(m1 + m2, centerOfMassP[i][1], 0, 0, g)
@@ -390,4 +416,3 @@ function displayStat() {
     }
 
 }
-
